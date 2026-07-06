@@ -19,6 +19,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/style.css" />
+  <style>
+    .nb-h2-logo { display: inline-block; height: 32px; width: auto; vertical-align: -6px; margin-right: 10px; }
+    .nbgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 22px; }
+    .nbcard {
+      display: flex; flex-direction: column;
+      border: 1px solid var(--rule); border-radius: 16px; background: var(--surface);
+      padding: 14px 14px 18px; overflow: hidden;
+      transition: border-color .15s, transform .12s, box-shadow .15s;
+    }
+    .nbcard:hover { border-color: var(--rule-2); transform: translateY(-3px); box-shadow: 0 14px 34px rgba(26,23,18,0.08); }
+    .nbcard .nb-thumb { width: 100%; border: 1px solid var(--rule); border-radius: 10px; }
+    .nbcard h3 { font-family: var(--font-display); font-weight: 500; font-size: 1.24rem; margin: 14px 6px 0; letter-spacing: -0.01em; color: var(--ink); }
+    .nbcard:hover h3 { color: var(--accent-ink); }
+    .nbcard p { margin: 7px 6px 0; color: var(--secondary); font-size: 0.95rem; line-height: 1.5; }
+    .nbcard .go { display: inline-block; margin: 10px 6px 0; font-size: 0.85rem; color: var(--accent-ink); }
+    @media (max-width: 720px) { .nbgrid { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -58,7 +75,7 @@
 
       <div class="techwall">
         <span class="lab">Working across</span>
-        <span class="t">dbt</span><span class="t">Airflow</span><span class="t">Snowflake</span><span class="t">Redshift</span><span class="t">Trino</span><span class="t">Iceberg</span><span class="t">AWS</span><span class="t">Kubernetes</span><span class="t">Python</span><span class="t">SQL</span>
+        <span class="t">dbt</span><span class="t">Airflow</span><span class="t">Snowflake</span><span class="t">Redshift</span><span class="t">Trino</span><span class="t">Iceberg</span><span class="t">AWS</span><span class="t">Kubernetes</span><span class="t">Python</span><span class="t">SQL</span><span class="t">Jupyter</span>
       </div>
     </section>
 
@@ -112,6 +129,27 @@
       </div>
     </section>
 
+    <section aria-labelledby="notebooks">
+      <div class="sec-head">
+        <div><p class="eyebrow">Notebooks</p><h2 id="notebooks"><img class="nb-h2-logo" src="assets/img/jupyter-logo.svg" alt="" width="44" height="51" />Analysis in Jupyter</h2></div>
+        <a href="https://github.com/dymytryo/notebooks">All notebooks &rarr;</a>
+      </div>
+      <div class="nbgrid">
+        <a class="nbcard" href="case-studies/monte-carlo-revenue-simulation.html">
+          <img class="nb-thumb" src="assets/img/thumb-monte-carlo.svg" alt="" width="400" height="250" />
+          <h3>Monte Carlo revenue simulation</h3>
+          <p>How much monthly volume would an outreach campaign actually convert? 10,000-trial distributions over a merchant lead pool &mdash; with best and worst cases, not just the average.</p>
+          <span class="go">Run the simulation live &rarr;</span>
+        </a>
+        <a class="nbcard" href="case-studies/data-profiling.html">
+          <img class="nb-thumb" src="assets/img/thumb-data-profiling.svg" alt="" width="400" height="250" />
+          <h3>Profile before you trust it</h3>
+          <p>Automated data profiling as an ingestion gate: a deliberately messy contact extract, 10 quality alerts raised automatically, every finding mapped to a concrete rule.</p>
+          <span class="go">Explore the live report &rarr;</span>
+        </a>
+      </div>
+    </section>
+
     <section aria-labelledby="how">
       <div class="sec-head"><div><p class="eyebrow">How I work</p><h2 id="how">From source to insight</h2></div></div>
       <div class="pipe">
@@ -144,7 +182,7 @@
         </div>
         <div class="skill-group">
           <h4><i class="si" data-lucide="line-chart"></i>BI &amp; ML</h4>
-          <div class="pills"><span class="pill">Tableau</span><span class="pill">QuickSight</span><span class="pill">BERT</span><span class="pill">entity resolution</span></div>
+          <div class="pills"><span class="pill">Tableau</span><span class="pill">QuickSight</span><span class="pill">Jupyter</span><span class="pill">BERT</span><span class="pill">entity resolution</span></div>
         </div>
       </div>
     </section>

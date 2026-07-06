@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monte Carlo revenue simulation — Dmytro Valiaiev</title>
+  <meta name="description" content="Interactive case study: estimating how much monthly payment volume an outreach campaign would convert, as a distribution instead of a point estimate. Jupyter notebook analysis with a live in-browser Monte Carlo simulator." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+  <style>
+    /* --- interactive simulator --- */
+    .sim { background: var(--surface-2); border-radius: 16px; padding: 26px 26px 22px; margin-top: 26px; }
+    .sim-controls { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 18px 26px; align-items: end; }
+    .sim-field label { display: block; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .sim-field .val { font-family: var(--font-mono); font-size: 0.95rem; color: var(--ink); }
+    .sim-field input[type="range"] { width: 100%; accent-color: var(--accent); margin-top: 8px; }
+    .sim-field select { font-family: var(--font-mono); font-size: 0.9rem; padding: 8px 10px; border: 1px solid var(--rule-2); border-radius: 8px; background: var(--surface); color: var(--ink); }
+    .sim-run { min-width: 150px; }
+    .sim-status { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); margin: 10px 0 0; min-height: 1.2em; }
+    .sim-canvas-wrap { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; margin-top: 16px; padding: 10px; }
+    #simCanvas { width: 100%; height: 320px; display: block; }
+    .sim-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
+    .sim-stats .mcard { background: var(--surface); }
+    .sim-stats .num { font-size: 1.25rem !important; }
+    .sim-note { font-size: 0.82rem; color: var(--muted); margin-top: 14px; }
+
+    /* --- expandable notebook cells --- */
+    details.code { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); margin: 16px 0; overflow: hidden; }
+    details.code summary { font-family: var(--font-mono); font-size: 0.82rem; color: var(--secondary); padding: 12px 18px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
+    details.code summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+    details.code[open] summary::before { transform: rotate(90deg); }
+    details.code summary:hover { color: var(--ink); }
+    details.code pre { margin: 0; padding: 4px 18px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6; color: var(--ink); }
+    .cell-out { background: var(--surface-2); border-radius: 12px; padding: 16px 20px; margin: 16px 0; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink); }
+    .nb-img { border: 1px solid var(--rule); border-radius: 10px; margin: 16px 0; box-shadow: 0 1px 4px rgba(26,23,18,0.06); }
+
+    table.results { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.88rem; }
+    table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
+    table.results td { font-family: var(--font-mono); font-size: 0.82rem; text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+    table.results th:first-child, table.results td:first-child { text-align: left; }
+
+    @media (max-width: 720px) {
+      .sim-controls { grid-template-columns: 1fr; }
+      .sim-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study &middot; Interactive</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Monte Carlo revenue simulation</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">Before committing call-team capacity to an outreach campaign, we wanted the realistic <em>range</em> of revenue outcomes — not a single average. This Jupyter notebook simulates thousands of campaign runs to answer: given N merchant leads and an assumed conversion rate, what does converted monthly volume look like?</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">10,000</div><div class="label">trials per scenario</div></div>
+        <div class="metric"><div class="num">6</div><div class="label">campaign scenarios modeled</div></div>
+        <div class="metric"><div class="num">$3.0M&ndash;$9.1M</div><div class="label">mean monthly volume across scenarios</div></div>
+        <div class="metric"><div class="num">55K</div><div class="label">lead pool (synthetic sample)</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Jupyter</span><span>Python</span><span>pandas + NumPy</span><span>Monte Carlo</span><span>matplotlib</span>
+      </div>
+    </div>
+
+    <section aria-labelledby="try" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Live</p><h2 id="try">Run the simulation yourself</h2></div></div>
+      <p style="color:var(--secondary);max-width:640px;margin:6px 0 0">The same model the notebook runs, re-implemented in your browser. Pick a campaign size and conversion rate — each trial resamples the lead pool and applies a per-lead conversion draw.</p>
+
+      <div class="sim">
+        <div class="sim-controls">
+          <div class="sim-field">
+            <label for="leads">Leads called &middot; <span class="val" id="leadsVal">10,000</span></label>
+            <input type="range" id="leads" min="1000" max="50000" step="1000" value="10000" />
+          </div>
+          <div class="sim-field">
+            <label for="rate">Conversion rate &middot; <span class="val" id="rateVal">6.0%</span></label>
+            <input type="range" id="rate" min="1" max="25" step="0.5" value="6" />
+          </div>
+          <div class="sim-field">
+            <label for="trials">Trials</label>
+            <select id="trials">
+              <option value="500">500</option>
+              <option value="1000" selected>1,000</option>
+              <option value="2000">2,000</option>
+            </select>
+          </div>
+          <button class="btn sim-run" id="runBtn" type="button">Run simulation</button>
+        </div>
+        <p class="sim-status" id="simStatus" aria-live="polite"></p>
+        <div class="sim-canvas-wrap"><canvas id="simCanvas" role="img" aria-label="Histogram of simulated converted monthly volume"></canvas></div>
+        <div class="sim-stats" aria-live="polite">
+          <div class="mcard"><div class="num" id="statMean">—</div><div class="label">mean estimated volume</div></div>
+          <div class="mcard"><div class="num" id="statStd">—</div><div class="label">standard deviation</div></div>
+          <div class="mcard"><div class="num" id="statMin">—</div><div class="label">minimum</div></div>
+          <div class="mcard"><div class="num" id="statMax">—</div><div class="label">maximum</div></div>
+        </div>
+        <p class="sim-note">Amounts are drawn from the same log-normal distribution as the notebook&rsquo;s synthetic sample (median &asymp; $1,000, clipped to $25&ndash;$250K). The notebook runs 10,000 trials per scenario; the browser default is 1,000 for responsiveness.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="analysis">
+      <div class="sec-head"><div><p class="eyebrow">The notebook</p><h2 id="analysis">The analysis, cell by cell</h2></div></div>
+
+      <div class="prose">
+        <p>Monte Carlo simulation models uncertain outcomes by running numerous trials with random inputs. Instead of asking &ldquo;what is the expected revenue,&rdquo; each trial answers &ldquo;what could one campaign plausibly look like&rdquo; &mdash; and 10,000 trials together give the distribution: mean, spread, and worst/best case. The output was used to size campaigns and set expectations with stakeholders.</p>
+        <p>Each trial bootstrap-resamples the lead pool (so the amount mix varies) and applies a Bernoulli conversion draw per lead (so conversion luck varies), then sums the converted amounts.</p>
+
+        <h3>The simulation engine</h3>
+        <p>Three small functions do all the work &mdash; expand to read the code.</p>
+      </div>
+
+      <details class="code">
+        <summary>run_simulation(data, conversion_rate, n_simulations=10000)</summary>
+        <pre>def run_simulation(data, conversion_rate, n_simulations=10000):
+    """
+    Simulates lead conversions.
+
+    Parameters:
+    - data: DataFrame containing transaction amounts.
+    - conversion_rate: Probability of conversion.
+    - n_simulations: Number of simulation runs.
+
+    Returns:
+    - results: List of total converted amounts from each run.
+    """
+    results = []
+    for _ in range(n_simulations):
+        sampled_data = data.sample(frac=1, replace=True)
+        sampled_data['converted'] = np.random.choice([0, 1], size=len(sampled_data), p=[1 - conversion_rate, conversion_rate])
+        sampled_data['converted_amount'] = sampled_data['amount'] * sampled_data['converted']
+        results.append(sampled_data['converted_amount'].sum())
+    return results</pre>
+      </details>
+
+      <details class="code">
+        <summary>report_results(results) &middot; summary statistics</summary>
+        <pre>def report_results(results):
+    """
+    Reports key statistics from simulation results.
+    """
+    mean_amount = np.mean(results)
+    std_amount = np.std(results)
+    min_amount = np.min(results)
+    max_amount = np.max(results)
+
+    print(f"Mean Estimated Amount: ${mean_amount:,.2f}")
+    print(f"Standard Deviation of Amount: ${std_amount:,.2f}")
+    print(f"Minimum Estimated Amount: ${min_amount:,.2f}")
+    print(f"Maximum Estimated Amount: ${max_amount:,.2f}")</pre>
+      </details>
+
+      <details class="code">
+        <summary>visualize_results(results, conversion_rate) &middot; histogram</summary>
+        <pre>def visualize_results(results, conversion_rate):
+    """
+    Displays a histogram of the results.
+    """
+    def millions_formatter(x, pos):
+        return f'${x * 1e-6:.1f}m'
+
+    plt.figure(figsize=(10, 6))
+    plt.hist(results, bins=30, color='skyblue', edgecolor='black', alpha=0.7)
+    plt.title(f'Converted Amount - {int(conversion_rate * 100)}% Conversion Rate')
+    plt.xlabel('Estimated Monthly Amount')
+    plt.ylabel('Frequency')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.gca().xaxis.set_major_formatter(FuncFormatter(millions_formatter))
+    plt.show()</pre>
+      </details>
+
+      <div class="prose">
+        <h3>Step 1 &mdash; scenario sweep over historical conversion rates</h3>
+        <p>The simulation runs for all records using pre-defined empirical conversion rates of 3%, 6%, and 9%, modeling overall expected revenue based on previously observed conversion probabilities.</p>
+      </div>
+
+      <details class="code">
+        <summary>scenario sweep &middot; 3 rates &times; 10,000 trials</summary>
+        <pre>for rate in [0.03, 0.06, 0.09]:
+    print(f"\nSimulation for Conversion Rate: {rate * 100}%")
+    simulation_results = run_simulation(df, rate)
+    report_results(simulation_results)
+    visualize_results(simulation_results, rate)</pre>
+      </details>
+
+      <div class="cell-out">Simulation for Conversion Rate: 3.0%
+Mean Estimated Amount: $3,004,925.92
+Standard Deviation of Amount: $145,264.12
+Minimum Estimated Amount: $2,554,038.64
+Maximum Estimated Amount: $3,770,864.36</div>
+      <img class="nb-img" src="../assets/img/monte-carlo/hist-3pct.png" loading="lazy" width="870" height="547" alt="Histogram of simulated converted monthly volume at a 3 percent conversion rate, centered near 3 million dollars" />
+
+      <div class="cell-out">Simulation for Conversion Rate: 6.0%
+Mean Estimated Amount: $6,009,009.36
+Standard Deviation of Amount: $203,435.36
+Minimum Estimated Amount: $5,280,808.72
+Maximum Estimated Amount: $6,849,921.03</div>
+      <img class="nb-img" src="../assets/img/monte-carlo/hist-6pct.png" loading="lazy" width="870" height="547" alt="Histogram of simulated converted monthly volume at a 6 percent conversion rate, centered near 6 million dollars" />
+
+      <div class="cell-out">Simulation for Conversion Rate: 9.0%
+Mean Estimated Amount: $9,016,173.79
+Standard Deviation of Amount: $249,015.11
+Minimum Estimated Amount: $8,139,603.41
+Maximum Estimated Amount: $10,091,463.09</div>
+      <img class="nb-img" src="../assets/img/monte-carlo/hist-9pct.png" loading="lazy" width="870" height="547" alt="Histogram of simulated converted monthly volume at a 9 percent conversion rate, centered near 9 million dollars" />
+
+      <div class="prose">
+        <h3>Step 2 &mdash; campaign-sized scenarios</h3>
+        <p>The second pass targets specific subsets of the pool, pairing lead counts with the conversion rates each campaign type could realistically achieve &mdash; distinct marketing strategies with varying customer volumes and conversion likelihoods.</p>
+      </div>
+
+      <details class="code">
+        <summary>lead exercises &middot; count &times; rate scenarios</summary>
+        <pre>lead_exercises = [
+    {'record_count': 10000, 'conversion_rate': 0.20},
+    {'record_count': 30000, 'conversion_rate': 0.15},
+    {'record_count': 50000, 'conversion_rate': 0.10}
+]
+
+exercise_results = []
+
+for exercise in lead_exercises:
+    results = run_simulation(df.sample(n=exercise['record_count']), exercise['conversion_rate'])
+    exercise_result = {
+        'Record Count': exercise['record_count'],
+        'Conversion Rate': exercise['conversion_rate'],
+        'Mean Amount': np.mean(results),
+        'Min Amount': np.min(results),
+        'Max Amount': np.max(results),
+        'Std Deviation Amount': np.std(results)
+    }
+    exercise_results.append(exercise_result)
+
+results_df = pd.DataFrame(exercise_results)</pre>
+      </details>
+
+      <table class="results">
+        <thead>
+          <tr><th>Leads</th><th>Conversion</th><th>Mean</th><th>Min</th><th>Max</th><th>Std dev</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>10,000</td><td>20%</td><td>$3,575,081</td><td>$3,093,707</td><td>$4,108,490</td><td>$146,556</td></tr>
+          <tr><td>30,000</td><td>15%</td><td>$8,227,917</td><td>$7,319,252</td><td>$9,506,154</td><td>$245,471</td></tr>
+          <tr><td>50,000</td><td>10%</td><td>$9,107,452</td><td>$8,244,760</td><td>$10,293,579</td><td>$251,249</td></tr>
+        </tbody>
+      </table>
+
+      <div class="prose">
+        <h3>Conclusions</h3>
+        <p>A focused 10K-lead campaign at a 20% conversion rate is worth roughly a third of a 50K-lead campaign at 10% &mdash; with a much smaller call-team commitment. Having the full distribution (not just the mean) made it possible to plan against the downside case rather than the average, and the spread quantified how much of the outcome is luck versus campaign design.</p>
+        <p>The simulation reduced uncertainty in resource allocation and gave stakeholders defensible best/worst-case bounds for each campaign option.</p>
+      </div>
+
+      <div class="callout" style="max-width:720px">
+        <p style="margin:0"><strong>Source &amp; data.</strong> The full notebook, a synthetic sample dataset (the original warehouse extract is not public), and the script that generated it are on GitHub:
+        <a class="ulink" href="https://github.com/dymytryo/notebooks/tree/main/monte_carlo_revenue_simulation">notebooks/monte_carlo_revenue_simulation</a></p>
+      </div>
+
+    </section>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // ----- distribution: matches data/generate_sample_data.py -----
+    var LOG_MU = 6.9, LOG_SIGMA = 1.1, CLIP_LO = 25, CLIP_HI = 250000;
+
+    function randNormal() {
+      var u = 0, v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+    function randAmount() {
+      var a = Math.exp(LOG_MU + LOG_SIGMA * randNormal());
+      return Math.min(CLIP_HI, Math.max(CLIP_LO, a));
+    }
+    // conversions per trial: Binomial(n, p) via normal approximation
+    function randConversions(n, p) {
+      var k = Math.round(n * p + randNormal() * Math.sqrt(n * p * (1 - p)));
+      return Math.min(n, Math.max(0, k));
+    }
+
+    // ----- dom -----
+    var leadsEl = document.getElementById('leads');
+    var rateEl = document.getElementById('rate');
+    var trialsEl = document.getElementById('trials');
+    var runBtn = document.getElementById('runBtn');
+    var statusEl = document.getElementById('simStatus');
+    var canvas = document.getElementById('simCanvas');
+    var ctx = canvas.getContext('2d');
+
+    var fmtInt = function (x) { return x.toLocaleString('en-US'); };
+    var fmtUsd = function (x) { return '$' + Math.round(x).toLocaleString('en-US'); };
+    var fmtM = function (x) { return '$' + (x / 1e6).toFixed(1) + 'm'; };
+
+    document.getElementById('leadsVal').textContent = fmtInt(+leadsEl.value);
+    document.getElementById('rateVal').textContent = (+rateEl.value).toFixed(1) + '%';
+    leadsEl.addEventListener('input', function () { document.getElementById('leadsVal').textContent = fmtInt(+leadsEl.value); });
+    rateEl.addEventListener('input', function () { document.getElementById('rateVal').textContent = (+rateEl.value).toFixed(1) + '%'; });
+
+    // ----- simulation, chunked to keep the page responsive -----
+    var running = false;
+    function runSimulation() {
+      if (running) return;
+      running = true;
+      runBtn.disabled = true;
+      var n = +leadsEl.value;
+      var p = +rateEl.value / 100;
+      var trials = +trialsEl.value;
+      var results = new Float64Array(trials);
+      var done = 0;
+      var CHUNK = 50;
+
+      function step() {
+        var end = Math.min(done + CHUNK, trials);
+        for (var t = done; t < end; t++) {
+          var k = randConversions(n, p);
+          var sum = 0;
+          for (var i = 0; i < k; i++) sum += randAmount();
+          results[t] = sum;
+        }
+        done = end;
+        statusEl.textContent = 'Running… ' + Math.round(100 * done / trials) + '%';
+        if (done < trials) {
+          setTimeout(step, 0);
+        } else {
+          statusEl.textContent = fmtInt(trials) + ' trials · ' + fmtInt(n) + ' leads at ' + (p * 100).toFixed(1) + '% conversion';
+          finish(results);
+        }
+      }
+      step();
+    }
+
+    function finish(results) {
+      var n = results.length, sum = 0, i;
+      var min = Infinity, max = -Infinity;
+      for (i = 0; i < n; i++) { sum += results[i]; if (results[i] < min) min = results[i]; if (results[i] > max) max = results[i]; }
+      var mean = sum / n, sq = 0;
+      for (i = 0; i < n; i++) { var d = results[i] - mean; sq += d * d; }
+      var std = Math.sqrt(sq / n);
+
+      document.getElementById('statMean').textContent = fmtUsd(mean);
+      document.getElementById('statStd').textContent = fmtUsd(std);
+      document.getElementById('statMin').textContent = fmtUsd(min);
+      document.getElementById('statMax').textContent = fmtUsd(max);
+
+      drawHistogram(results, min, max);
+      running = false;
+      runBtn.disabled = false;
+    }
+
+    // ----- canvas histogram in the site's palette -----
+    function cssVar(name, fallback) {
+      var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return v || fallback;
+    }
+    function drawHistogram(results, min, max) {
+      var dpr = window.devicePixelRatio || 1;
+      var W = canvas.clientWidth, H = canvas.clientHeight || 320;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+
+      var BINS = 30;
+      var counts = new Array(BINS).fill(0);
+      var span = (max - min) || 1;
+      for (var i = 0; i < results.length; i++) {
+        var b = Math.min(BINS - 1, Math.floor((results[i] - min) / span * BINS));
+        counts[b]++;
+      }
+      var peak = Math.max.apply(null, counts);
+
+      var padL = 46, padR = 12, padT = 12, padB = 30;
+      var plotW = W - padL - padR, plotH = H - padT - padB;
+
+      var ink = cssVar('--ink', '#1A1712');
+      var muted = cssVar('--muted', '#8B8577');
+      var rule = cssVar('--rule', '#E7E1D5');
+      var accent = cssVar('--accent', '#B4441E');
+
+      ctx.font = '11px ui-monospace, Menlo, monospace';
+
+      // horizontal gridlines + y labels
+      ctx.strokeStyle = rule; ctx.fillStyle = muted; ctx.lineWidth = 1;
+      var ySteps = 4;
+      for (var g = 0; g <= ySteps; g++) {
+        var yv = Math.round(peak * g / ySteps);
+        var y = padT + plotH - (plotH * g / ySteps);
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        ctx.fillText(String(yv), padL - 8, y);
+      }
+
+      // bars
+      var bw = plotW / BINS;
+      ctx.fillStyle = accent;
+      ctx.globalAlpha = 0.78;
+      for (var b2 = 0; b2 < BINS; b2++) {
+        var h = peak ? (counts[b2] / peak) * plotH : 0;
+        ctx.fillRect(padL + b2 * bw + 1, padT + plotH - h, bw - 2, h);
+      }
+      ctx.globalAlpha = 1;
+
+      // x labels
+      ctx.fillStyle = muted; ctx.textBaseline = 'top';
+      var xTicks = 5;
+      for (var t = 0; t <= xTicks; t++) {
+        var xv = min + span * t / xTicks;
+        var x = padL + plotW * t / xTicks;
+        ctx.textAlign = t === 0 ? 'left' : (t === xTicks ? 'right' : 'center');
+        ctx.fillText(fmtM(xv), x, padT + plotH + 8);
+      }
+
+      // axis line
+      ctx.strokeStyle = ink; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(padL, padT + plotH); ctx.lineTo(W - padR, padT + plotH); ctx.stroke();
+    }
+
+    runBtn.addEventListener('click', runSimulation);
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () { if (!running) runSimulation(); }, 250);
+    });
+
+    runSimulation(); // first render with defaults
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Profile before you trust it — Dmytro Valiaiev</title>
+  <meta name="description" content="Interactive case study: automated data profiling as an ingestion gate. A deliberately messy merchant-contact extract, profiled with fg-data-profiling — explore the full interactive report live." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+  <style>
+    details.code { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); margin: 16px 0; overflow: hidden; }
+    details.code summary { font-family: var(--font-mono); font-size: 0.82rem; color: var(--secondary); padding: 12px 18px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
+    details.code summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+    details.code[open] summary::before { transform: rotate(90deg); }
+    details.code summary:hover { color: var(--ink); }
+    details.code pre { margin: 0; padding: 4px 18px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6; color: var(--ink); }
+    .cell-out { background: var(--surface-2); border-radius: 12px; padding: 16px 20px; margin: 16px 0; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink); }
+    .report-frame-wrap { border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; background: var(--surface); margin-top: 22px; box-shadow: 0 1px 4px rgba(26,23,18,0.06); }
+    .report-frame-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--rule); background: var(--surface-2); }
+    .report-frame-bar .lab { font-family: var(--font-mono); font-size: 0.78rem; color: var(--secondary); }
+    .report-frame-bar a { font-size: 0.82rem; border: 1px solid var(--rule-2); border-radius: 999px; padding: 5px 12px; color: var(--ink); white-space: nowrap; }
+    .report-frame-bar a:hover { border-color: var(--accent); color: var(--accent-ink); }
+    #reportFrame { width: 100%; height: 640px; border: 0; display: block; background: #fff; }
+    table.results { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.9rem; }
+    table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
+    table.results td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    table.results td:first-child { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; color: var(--accent-ink); }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study &middot; Interactive</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Profile before you trust it</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">A new source file lands and someone asks to &ldquo;just load it into the warehouse.&rdquo; This notebook is the gate that file passes first: an automated profile that surfaces missingness, duplicates, format drift, and outliers &mdash; so ingestion rules are written from evidence, not guesses.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">10</div><div class="label">quality alerts raised automatically</div></div>
+        <div class="metric"><div class="num">11.5%</div><div class="label">missing phone numbers caught</div></div>
+        <div class="metric"><div class="num">12 + 124</div><div class="label">exact + case-variant duplicate keys</div></div>
+        <div class="metric"><div class="num">$1.2B</div><div class="label">the outlier that would wreck every aggregate</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Jupyter</span><span>Python</span><span>fg-data-profiling</span><span>data quality</span><span>pandas</span>
+      </div>
+    </div>
+
+    <section aria-labelledby="live" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Live</p><h2 id="live">Explore the report</h2></div></div>
+      <p style="color:var(--secondary);max-width:640px;margin:6px 0 0">This is the actual report the notebook generated &mdash; one line of code, fully self-contained. Click through variables, correlations, missing-value patterns, and the alert list.</p>
+
+      <div class="report-frame-wrap">
+        <div class="report-frame-bar">
+          <span class="lab">profile_report.html &middot; generated by fg-data-profiling</span>
+          <a href="../assets/reports/data-profiling-report.html" target="_blank" rel="noopener">Open full screen &nearr;</a>
+        </div>
+        <iframe id="reportFrame" src="../assets/reports/data-profiling-report.html" loading="lazy" title="Interactive data profiling report for the merchant contacts extract"></iframe>
+      </div>
+    </section>
+
+    <section aria-labelledby="analysis">
+      <div class="sec-head"><div><p class="eyebrow">The notebook</p><h2 id="analysis">The analysis, cell by cell</h2></div></div>
+
+      <div class="prose">
+        <p>The dataset is a synthetic merchant-contact extract that is messy <em>on purpose</em> &mdash; every defect was injected by a documented generator script, so the profile&rsquo;s findings can be checked against ground truth. All names and contacts are fabricated.</p>
+        <h3>Step 1 &mdash; first contact with the file</h3>
+        <p>Before any tooling: how big is it, what does it look like, what did pandas guess for types?</p>
+      </div>
+
+      <details class="code">
+        <summary>load &amp; first look</summary>
+        <pre>import pandas as pd
+
+# pandas-profiling -> ydata-profiling (2023) -> fg-data-profiling (2026)
+from data_profiling import ProfileReport
+
+df = pd.read_csv('data/merchant_contacts_raw.csv')
+df.head(10)
+
+print(f"shape: {df.shape[0]:,} rows x {df.shape[1]} columns")
+df.dtypes</pre>
+      </details>
+
+      <div class="cell-out">shape: 2,060 rows x 12 columns</div>
+
+      <div class="prose">
+        <p>Two smells already: <code>zip</code> came through as a mixed column with 4-digit values (leading zeros lost in a spreadsheet round-trip), and <code>signup_date</code> parsed as a plain object.</p>
+        <h3>Step 2 &mdash; targeted checks</h3>
+        <p>The two questions worth asking any contact list up front: what&rsquo;s missing, and who is in here twice?</p>
+      </div>
+
+      <details class="code">
+        <summary>missingness &amp; duplicates</summary>
+        <pre>missing = (
+    df.isna().mean()
+      .sort_values(ascending=False)
+      .to_frame('missing_rate')
+      .query('missing_rate > 0')
+)
+
+exact_dupes = df.duplicated(subset=[col for col in df.columns if col != 'record_id']).sum()
+
+key = (
+    df['company_name'].str.lower().fillna('')
+    + '|' + df['contact_last'].str.lower().fillna('')
+    + '|' + df['city'].str.lower().fillna('')
+)
+fuzzy_groups = key.value_counts()</pre>
+      </details>
+
+      <div class="cell-out">phone            11.5%
+contact_first     6.7%
+zip               5.0%
+email             3.4%
+signup_date       2.3%
+
+exact duplicate rows (ignoring record_id): 12
+case-insensitive merchant keys appearing more than once: 124</div>
+
+      <div class="prose">
+        <h3>Step 3 &mdash; the one-liner profile</h3>
+        <p><code>ProfileReport</code> computes per-column distributions, missingness patterns, duplicate detection, correlations, and cross-column alerts &mdash; and writes the self-contained interactive report embedded above.</p>
+      </div>
+
+      <details class="code">
+        <summary>generate the report + alert list</summary>
+        <pre>profile = ProfileReport(
+    df,
+    title='Merchant Contacts - Raw Extract Profile',
+)
+profile.to_file('profile_report.html')
+
+alerts = profile.description_set.alerts
+for a in alerts:
+    print(f"- {a}")</pre>
+      </details>
+
+      <div class="cell-out">alerts raised: 10
+
+- Dataset has 12 (0.6%) duplicate rows
+- [city] is highly overall correlated with [state] and 1 other fields
+- [state] is highly overall correlated with [city] and 1 other fields
+- [zip] is highly overall correlated with [city] and 1 other fields
+- [contact_first] 139 (6.7%) missing values
+- [email] 71 (3.4%) missing values
+- [phone] 237 (11.5%) missing values
+- [zip] 104 (5.0%) missing values
+- [signup_date] 47 (2.3%) missing values
+- [monthly_volume] is highly skewed(γ1 = 45.4)</div>
+
+      <div class="prose">
+        <h3>Findings &rarr; ingestion rules</h3>
+        <p>Each alert maps to a concrete control before this file joins any warehouse table:</p>
+      </div>
+
+      <table class="results">
+        <thead><tr><th>What the profile caught</th><th>The rule it becomes</th></tr></thead>
+        <tbody>
+          <tr><td>phone 11.5% missing</td><td>Completeness threshold; &ldquo;phone required&rdquo; flag for call-campaign consumers.</td></tr>
+          <tr><td>12 exact + case-variant duplicates</td><td>Dedup key and entity resolution before joining any merchant dimension.</td></tr>
+          <tr><td>zip has 4-digit values</td><td>Store as text, zero-pad to 5 on ingest &mdash; the classic lost leading zero.</td></tr>
+          <tr><td>monthly_volume skew &gamma;&#8321; = 45.4</td><td>Accepted-range test: negatives (leaked refunds), zeros, and a $1.2B outlier quarantined.</td></tr>
+          <tr><td>status: active / Active / ACTIVE</td><td>Normalize casing; accepted-values test on the cleaned set.</td></tr>
+          <tr><td>1900-01-01 and future signup dates</td><td>Freshness/validity window; sentinel dates rejected at the gate.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="prose">
+        <h3>Why this matters</h3>
+        <p>The same report runs on every new file drop in CI and gets diffed against the previous profile to catch drift. And because it&rsquo;s a shareable artifact, the conversation about what &ldquo;clean enough&rdquo; means happens around evidence &mdash; with stakeholders who never open a notebook.</p>
+      </div>
+
+      <div class="callout" style="max-width:720px">
+        <p style="margin:0"><strong>Source &amp; data.</strong> The executed notebook, the synthetic dataset, and the generator script (every injected defect documented) are on GitHub:
+        <a class="ulink" href="https://github.com/dymytryo/notebooks/tree/main/data_profiling">notebooks/data_profiling</a></p>
+      </div>
+
+    </section>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+</body>
+</html>

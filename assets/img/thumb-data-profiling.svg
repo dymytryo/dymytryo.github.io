@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#F6F1E9"/>
+  <!-- missingness matrix: columns of data cells, gaps = missing values -->
+  <g fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5">
+    <rect x="56"  y="46" width="34" height="18" rx="5"/><rect x="56"  y="72" width="34" height="18" rx="5"/><rect x="56"  y="98" width="34" height="18" rx="5"/><rect x="56"  y="124" width="34" height="18" rx="5"/><rect x="56"  y="150" width="34" height="18" rx="5"/><rect x="56"  y="176" width="34" height="18" rx="5"/><rect x="56"  y="202" width="34" height="18" rx="5"/>
+    <rect x="100" y="46" width="34" height="18" rx="5"/><rect x="100" y="98" width="34" height="18" rx="5"/><rect x="100" y="124" width="34" height="18" rx="5"/><rect x="100" y="176" width="34" height="18" rx="5"/><rect x="100" y="202" width="34" height="18" rx="5"/>
+    <rect x="144" y="46" width="34" height="18" rx="5"/><rect x="144" y="72" width="34" height="18" rx="5"/><rect x="144" y="124" width="34" height="18" rx="5"/><rect x="144" y="150" width="34" height="18" rx="5"/><rect x="144" y="202" width="34" height="18" rx="5"/>
+    <rect x="188" y="46" width="34" height="18" rx="5"/><rect x="188" y="72" width="34" height="18" rx="5"/><rect x="188" y="98" width="34" height="18" rx="5"/><rect x="188" y="150" width="34" height="18" rx="5"/><rect x="188" y="176" width="34" height="18" rx="5"/>
+    <rect x="232" y="72" width="34" height="18" rx="5"/><rect x="232" y="98" width="34" height="18" rx="5"/><rect x="232" y="124" width="34" height="18" rx="5"/><rect x="232" y="176" width="34" height="18" rx="5"/><rect x="232" y="202" width="34" height="18" rx="5"/>
+  </g>
+  <!-- flagged cells -->
+  <g fill="#F3D9CC" stroke="#B4441E" stroke-width="1.5">
+    <rect x="100" y="72" width="34" height="18" rx="5"/>
+    <rect x="144" y="176" width="34" height="18" rx="5"/>
+    <rect x="188" y="124" width="34" height="18" rx="5"/>
+    <rect x="232" y="46" width="34" height="18" rx="5"/>
+    <rect x="100" y="150" width="34" height="18" rx="5"/>
+  </g>
+  <!-- magnifier -->
+  <g stroke="#B4441E" stroke-width="7" fill="none" stroke-linecap="round">
+    <circle cx="303" cy="118" r="38" fill="#FBFAF6" fill-opacity="0.85"/>
+    <line x1="331" y1="146" x2="356" y2="171"/>
+  </g>
+  <g stroke="#B4441E" stroke-width="4" stroke-linecap="round">
+    <line x1="289" y1="132" x2="289" y2="120"/>
+    <line x1="302" y1="132" x2="302" y2="110"/>
+    <line x1="315" y1="132" x2="315" y2="126"/>
+  </g>
+</svg>
