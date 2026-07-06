@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vehicle loan propensity modeling for marketing — Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: an end-to-end ML project at First Community Credit Union predicting which of 175,000 members will need a vehicle loan within 60 days. 57 predictors, a 25-algorithm bake-off, thresholds priced per campaign channel, 10,000+ marketing leads." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Vehicle loan propensity modeling for marketing</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">An end-to-end machine learning project at First Community Credit Union (175,000 members, 17 branches): predicting which members will need a vehicle loan in the next 60 days, and turning the answer into ranked, channel-specific marketing leads.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">10,000+</div><div class="label">marketing leads delivered</div></div>
+        <div class="metric"><div class="num">97.04%</div><div class="label">best-model accuracy</div></div>
+        <div class="metric"><div class="num">1 in 17</div><div class="label">members flagged in 60 days</div></div>
+        <div class="metric"><div class="num">25+</div><div class="label">algorithms compared</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Python</span><span>scikit-learn</span><span>pandas + NumPy</span><span>SQL Server (T-SQL)</span><span>Tableau</span><span>Machine Learning</span>
+      </div>
+    </div>
+
+    <div style="margin-top:44px">
+      <p class="eyebrow" style="margin:0">The deck &middot; 10 slides</p>
+    </div>
+    <div class="slides">
+      <img src="../assets/img/vehicle-loan-propensity/slide-01.png" loading="lazy" width="1921" height="1080" alt="Title slide: vehicle loan propensity modeling for marketing at First Community Credit Union" />
+      <img src="../assets/img/vehicle-loan-propensity/slide-02.png" loading="lazy" width="1921" height="1080" alt="Context: why predict a car loan, with behavioral signals quantified from member data" />
+      <img src="../assets/img/vehicle-loan-propensity/slide-03.png" loading="lazy" width="1921" height="1080" alt="Data: four source systems joined into a SQL Server DataMart, 57 predictors per member" />
+      <img src="../assets/img/vehicle-loan-propensity/slide-04.png" loading="lazy" width="1921" height="1080" alt="Pipeline: the stack end to end, from SQL Server through Tableau Prep and pandas to scikit-learn" />
+      <img src="../assets/img/vehicle-loan-propensity/slide-05.png" loading="lazy" width="1921" height="1080" alt="Data quality: sixty percent of the work was the data, with a missing-values matrix and entry-form typos" />
+      <img src="../assets/img/vehicle-loan-propensity/slide-06.png" loading="lazy" width="1921" height="1080" alt="Exploration: credit-score distribution of applicants vs non-applicants and a correlation matrix" />
+      <img src="../assets/img/vehicle-loan-propensity/slide-07.png" loading="lazy" width="1921" height="1080" alt="Member insights across 17 branches: network map, likely applicants by branch, propensity mix by area" />
+      <img src="../assets/img/vehicle-loan-propensity/slide-08.png" loading="lazy" width="1921" height="1080" alt="Modeling: a twenty-five algorithm bake-off with ROC curves; logistic regression wins at 97.04%" />
+      <img src="../assets/img/vehicle-loan-propensity/slide-09.png" loading="lazy" width="1921" height="1080" alt="Deployment: thresholds priced per channel, three published operating points for call, mail, and email" />
+      <img src="../assets/img/vehicle-loan-propensity/slide-10.png" loading="lazy" width="1921" height="1080" alt="Proposed campaign operating model: overnight scoring, three waves, holdout measurement, retraining loop" />
+    </div>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>window.lucide && lucide.createIcons();</script>
+</body>
+</html>

@@ -44,7 +44,15 @@
       <div class="tags" style="margin-top:16px">
         <span>Starburst / Trino</span><span>Apache Iceberg</span><span>dbt</span><span>Amazon Redshift</span><span>AWS Glue + S3</span><span>GitLab CI</span><span>Paradime</span><span>Tableau</span>
       </div>
-      <p style="margin-top:18px;color:var(--secondary);max-width:660px">Companion repository: anonymized migration patterns, including the translation layer, transition-branch automation, and Tableau migration tracker, at <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration">github.com/dymytryo/warehouse-to-lakehouse-migration</a>.</p>
+      <div class="slide-link" style="margin-top:22px">
+        <div>
+          <p class="eyebrow">Companion repo</p>
+          <p>The anonymized implementation behind this case study: the dbt translation engine, the self-rebasing GitLab transition branch, and the Tableau migration tracker. Sections below deep-link into it next to the slide they support.</p>
+        </div>
+        <div class="slide-link-actions">
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration">View on GitHub</a>
+        </div>
+      </div>
     </div>
 
     <div style="margin-top:44px">
@@ -65,7 +73,7 @@
         </div>
         <div class="slide-link-actions">
           <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration">Technical README</a>
-          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration#target-architecture">Architecture flow</a>
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration#-target-architecture">Architecture flow</a>
         </div>
       </div>
       <img src="../assets/img/shift-left/slide-08.png" loading="lazy" width="1921" height="1080" alt="Engineering: the 12-stage migration factory with five automated fail gates" />
@@ -75,9 +83,9 @@
           <p>The migration factory broken into inspectable functional areas.</p>
         </div>
         <div class="slide-link-actions">
-          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration#dbt-translation-layer">Translation engine</a>
-          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration#gitlab-transition-branch">GitLab auto-rebase</a>
-          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration#migration-tracker">Migration tracker</a>
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration#-dbt-translation-layer">Translation engine</a>
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration/blob/main/translation-engine/redshift-to-trino-function-mapping.md">Function mapping</a>
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration#-gitlab-transition-branch">GitLab auto-rebase</a>
         </div>
       </div>
       <img src="../assets/img/shift-left/slide-09.png" loading="lazy" width="1921" height="1080" alt="Validation results: exact parity on a 435.8M-row fact and the migration tracker" />
@@ -87,7 +95,7 @@
           <p>Tracker screenshot and SQL pattern for object-level migration status.</p>
         </div>
         <div class="slide-link-actions">
-          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration#migration-tracker">Tracker in README</a>
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration#-migration-tracker">Tracker in README</a>
           <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration/blob/main/tableau-migration-tracker/migration_tracker.sql">Tracker SQL</a>
         </div>
       </div>
@@ -111,7 +119,7 @@
           <p>Architecture flow included directly in the migration repository README.</p>
         </div>
         <div class="slide-link-actions">
-          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration#target-architecture">Architecture in README</a>
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration#-target-architecture">Architecture in README</a>
         </div>
       </div>
       <img src="../assets/img/shift-left/slide-14.png" loading="lazy" width="1921" height="1080" alt="Outcome: what changed, from decoupled compute to one SQL dialect" />

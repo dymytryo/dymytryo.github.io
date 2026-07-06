@@ -260,6 +260,7 @@ section { margin: 64px 0; }
 .pcard { position: relative; border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; background: var(--surface); display: flex; flex-direction: column; transition: border-color .15s, transform .12s, box-shadow .15s; }
 .pcard:hover { border-color: var(--rule-2); transform: translateY(-3px); box-shadow: 0 14px 34px rgba(26,23,18,0.08); }
 .pcard .thumb { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; border-bottom: 1px solid var(--rule); }
+.pcard .thumb--fit { aspect-ratio: 1402 / 1239; height: auto; }
 .pcard .body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
 .pcard h3 { font-family: var(--font-display); font-weight: 500; font-size: 1.24rem; margin: 0; letter-spacing: -0.01em; }
 .pcard h3 a { color: var(--ink); }
