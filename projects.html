@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Projects — Dmytro Valiaiev</title>
+  <meta name="description" content="Selected data engineering projects by Dmytro Valiaiev: lakehouse migrations, dbt at scale, orchestration, DataOps, and applied ML." />
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="projects.html" class="here">Projects</a>
+        <a href="about.html">About</a>
+        <a class="nav-cta" href="assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px">
+      <p class="eyebrow">Projects</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.2rem)">Selected work</h1>
+      <p class="lead">A curated set of the systems I&rsquo;ve designed and shipped. The public repositories are anonymized showcases of production work — architecture and patterns, without internal data.</p>
+    </section>
+
+    <section style="margin-top:24px">
+      <div class="cardgrid">
+
+        <article class="pcard">
+          <img class="thumb" src="assets/img/thumb-lead-optimization.png" alt="" width="400" height="250" />
+          <div class="body">
+            <h3><a href="case-studies/lead-optimization-pipeline.html">Lead optimization pipeline</a></h3>
+            <p>Resolved 1M+ CRM leads into 776K vendor groups, removed 440K non-viable leads (up to 1.9M calls saved), and re-sourced with card-network signals — lifting conversion +30%.</p>
+            <div class="tags"><span>case study</span><span>Entity resolution</span><span>BERT</span><span>AWS</span></div>
+            <span class="go">Read case study &rarr;</span>
+          </div>
+        </article>
+
+        <article class="pcard">
+          <img class="thumb" src="assets/img/thumb-lakehouse-migration.png" alt="" width="400" height="250" />
+          <div class="body">
+            <h3><a href="case-studies/shift-left-lakehouse-migration.html">Redshift → Trino + Iceberg lakehouse</a></h3>
+            <p>Migrated a 200+ TB enterprise warehouse to an Apache Iceberg lakehouse on Trino via a zero-repoint hot swap, with automated SQL translation and parity validation. 100% object parity, 60% cost cut.</p>
+            <div class="tags"><span>case study</span><span>Trino</span><span>Iceberg</span><span>dbt</span></div>
+            <span class="go">Read case study &rarr;</span>
+          </div>
+        </article>
+
+        <article class="pcard">
+          <img class="thumb" src="assets/img/thumb-grid.svg" alt="" width="400" height="250" />
+          <div class="body">
+            <h3><a href="https://github.com/dymytryo/dbt-on-Kubernetes">dbt on Kubernetes</a></h3>
+            <p>Production dbt-Snowflake project running ~1,000 models across 37 scheduled CronJobs, orchestrated with Helm and credentials injected from Consul and AWS Secrets Manager.</p>
+            <div class="tags"><span>dbt</span><span>Kubernetes</span><span>Helm</span><span>Snowflake</span></div>
+            <span class="go">View on GitHub &rarr;</span>
+          </div>
+        </article>
+
+        <article class="pcard">
+          <img class="thumb" src="assets/img/thumb-flow.svg" alt="" width="400" height="250" />
+          <div class="body">
+            <h3><a href="https://github.com/dymytryo/airflow-mwaa-dbt-utilities">Airflow MWAA dbt utilities</a></h3>
+            <p>Custom Airflow operators that run dbt in ECS/Fargate from AWS MWAA, with a local Docker fallback and debug DAGs for Secrets Manager, container state, and Starburst connectivity.</p>
+            <div class="tags"><span>Airflow / MWAA</span><span>ECS / Fargate</span><span>dbt</span><span>AWS</span></div>
+            <span class="go">View on GitHub &rarr;</span>
+          </div>
+        </article>
+
+        <article class="pcard">
+          <img class="thumb" src="assets/img/thumb-spark.svg" alt="" width="400" height="250" />
+          <div class="body">
+            <h3><a href="https://github.com/dymytryo/starburst-table-usage-analysis">Starburst table-usage → AI context</a></h3>
+            <p>Incremental dbt models over Starburst query metadata that rank 1,000+ tables by real usage — feeding a prioritized context list to a &ldquo;talk-to-your-data&rdquo; AI assistant.</p>
+            <div class="tags"><span>Trino</span><span>dbt</span><span>AI context</span><span>metadata</span></div>
+            <span class="go">View on GitHub &rarr;</span>
+          </div>
+        </article>
+
+        <article class="pcard">
+          <img class="thumb" src="assets/img/thumb-grid.svg" alt="" width="400" height="250" />
+          <div class="body">
+            <h3><a href="https://github.com/dymytryo/dataops-pipe">DataOps Pipe</a></h3>
+            <p>A modular DataOps framework that applies a controls scorecard for validation, governance, and observability across pipeline stages using open-source tooling and CI/CD.</p>
+            <div class="tags"><span>DataOps</span><span>CI/CD</span><span>governance</span><span>Python</span></div>
+            <span class="go">View on GitHub &rarr;</span>
+          </div>
+        </article>
+
+        <article class="pcard">
+          <img class="thumb" src="assets/img/thumb-layers.svg" alt="" width="400" height="250" />
+          <div class="body">
+            <h3><a href="https://github.com/dymytryo/dbt-lifecycle-management">dbt lifecycle management</a></h3>
+            <p>Scheduled maintenance for a Trino + Iceberg warehouse: Iceberg table optimization, orphan-object detection against the dbt manifest, and safe cleanup of lower environments.</p>
+            <div class="tags"><span>Iceberg</span><span>Trino</span><span>dbt</span><span>cost control</span></div>
+            <span class="go">View on GitHub &rarr;</span>
+          </div>
+        </article>
+
+        <article class="pcard">
+          <img class="thumb" src="assets/img/thumb-flow.svg" alt="" width="400" height="250" />
+          <div class="body">
+            <h3><a href="https://github.com/dymytryo/multi-repo-contribution-tracker">Multi-repo contribution tracker</a></h3>
+            <p>A pipeline that collects merge-request metrics across N GitLab repositories, computes per-author line stats from diffs, and writes them incrementally to a Trino analytics table.</p>
+            <div class="tags"><span>Python</span><span>GitLab API</span><span>Trino</span><span>incremental</span></div>
+            <span class="go">View on GitHub &rarr;</span>
+          </div>
+        </article>
+
+        <article class="pcard">
+          <img class="thumb" src="assets/img/thumb-grid.svg" alt="" width="400" height="250" />
+          <div class="body">
+            <h3><a href="https://github.com/dymytryo/dbt">dbt patterns &amp; macros</a></h3>
+            <p>Reusable analytics-engineering patterns — idempotent month-control incremental models, date spines, dynamic SQL generation, and post-hook maintenance macros.</p>
+            <div class="tags"><span>dbt</span><span>macros</span><span>incremental</span><span>SQL</span></div>
+            <span class="go">View on GitHub &rarr;</span>
+          </div>
+        </article>
+
+        <article class="pcard">
+          <img class="thumb" src="assets/img/thumb-spark.svg" alt="" width="400" height="250" />
+          <div class="body">
+            <h3><a href="https://github.com/dymytryo/car_loan_propensity">Car-loan propensity model</a></h3>
+            <p>An end-to-end ML project predicting a member&rsquo;s likelihood to take a car loan, presented in three tailored versions for IT leadership, analysts, and executives.</p>
+            <div class="tags"><span>Python</span><span>machine learning</span><span>stakeholder comms</span></div>
+            <span class="go">View on GitHub &rarr;</span>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <section aria-labelledby="refs">
+      <div class="sec-head"><div><p class="eyebrow">Notes &amp; references</p><h2 id="refs">Field notes</h2></div></div>
+      <p style="color:var(--secondary);max-width:640px;margin:0 0 4px">Working references I keep while building — patterns, query snippets, and platform notes.</p>
+      <div class="tags" style="margin-top:14px">
+        <span><a href="https://github.com/dymytryo/data_warehouse">data-systems overview</a></span>
+        <span><a href="https://github.com/dymytryo/observability">observability &amp; data quality</a></span>
+        <span><a href="https://github.com/dymytryo/redshift">Redshift ops</a></span>
+        <span><a href="https://github.com/dymytryo/sql_snippets">SQL snippets</a></span>
+      </div>
+    </section>
+
+    <a class="backlink" href="index.html">&larr; Back home</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>window.lucide && lucide.createIcons();</script>
+</body>
+</html>

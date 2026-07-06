@@ -1,0 +1,5 @@
+# OS / editor / office junk
+.DS_Store
+Thumbs.db
+*.tmp
+.~lock.*#

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shift Left: warehouse-to-lakehouse migration — Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: migrating a 200+ TB Redshift warehouse to a Starburst + Apache Iceberg lakehouse via a hot-swap cutover, with automated dbt SQL translation, a self-rebasing transition branch, and parity validation. ~50x faster key queries at ~60% lower platform cost." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Shift Left: warehouse-to-lakehouse migration</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">Migrated a B2B payments fintech&rsquo;s 200+ TB, 2,000+ model Redshift warehouse to a Starburst + Apache Iceberg lakehouse via a zero-repoint hot swap: automated Trino SQL translation, a self-rebasing transition branch, and per-object parity validation gated the cutover end users never noticed.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">~50&times;</div><div class="label">faster critical Finance query</div></div>
+        <div class="metric"><div class="num">150 &rarr; 26</div><div class="label">orchestration jobs (&minus;80%)</div></div>
+        <div class="metric"><div class="num">0</div><div class="label">cluster reboots since cutover</div></div>
+        <div class="metric"><div class="num">~60%</div><div class="label">lower platform cost</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Starburst / Trino</span><span>Apache Iceberg</span><span>dbt</span><span>Amazon Redshift</span><span>AWS Glue + S3</span><span>GitLab CI</span><span>Paradime</span><span>Tableau</span>
+      </div>
+      <p style="margin-top:18px;color:var(--secondary);max-width:660px">Companion repository: anonymized migration patterns, including the translation layer, transition-branch automation, and Tableau migration tracker, at <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration">github.com/dymytryo/warehouse-to-lakehouse-migration</a>.</p>
+    </div>
+
+    <div style="margin-top:44px">
+      <p class="eyebrow" style="margin:0">The deck &middot; 14 slides</p>
+    </div>
+    <div class="slides">
+      <img src="../assets/img/shift-left/slide-01.png" loading="lazy" width="1921" height="1080" alt="Title slide: Shift Left, warehouse-to-lakehouse migration" />
+      <img src="../assets/img/shift-left/slide-02.png" loading="lazy" width="1921" height="1080" alt="Context: 200+ TB and 2,000+ dbt models on Redshift, with 12x active-user growth in a year" />
+      <img src="../assets/img/shift-left/slide-03.png" loading="lazy" width="1921" height="1080" alt="Background: evolution and challenges of the warehouse from late 2022 to late 2024" />
+      <img src="../assets/img/shift-left/slide-04.png" loading="lazy" width="1921" height="1080" alt="Problem: Redshift failing the business four ways, including a 50-minute Finance query" />
+      <img src="../assets/img/shift-left/slide-05.png" loading="lazy" width="1921" height="1080" alt="Solution assessment: staged migration versus big-bang versus the chosen hot swap" />
+      <img src="../assets/img/shift-left/slide-06.png" loading="lazy" width="1921" height="1080" alt="Feasibility: benchmarks on production volumes proving the lakehouse before building" />
+      <img src="../assets/img/shift-left/slide-07.png" loading="lazy" width="1921" height="1080" alt="Design: the hot swap mechanically, parallel dbt targets and a catalog rename in Starburst" />
+      <div class="slide-link">
+        <div>
+          <p class="eyebrow">Repo companion</p>
+          <p>Implementation notes for the hot-swap architecture and migration control plane.</p>
+        </div>
+        <div class="slide-link-actions">
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration">Technical README</a>
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration/tree/main/lakehouse-architecture">Architecture flow</a>
+        </div>
+      </div>
+      <img src="../assets/img/shift-left/slide-08.png" loading="lazy" width="1921" height="1080" alt="Engineering: the 12-stage migration factory with five automated fail gates" />
+      <div class="slide-link">
+        <div>
+          <p class="eyebrow">Repo companion</p>
+          <p>The migration factory broken into inspectable functional areas.</p>
+        </div>
+        <div class="slide-link-actions">
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration/tree/main/translation-engine">Translation engine</a>
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration/tree/main/gitlab-autorebase-transition-branch">GitLab auto-rebase</a>
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration/tree/main/tableau-migration-tracker">Migration tracker</a>
+        </div>
+      </div>
+      <img src="../assets/img/shift-left/slide-09.png" loading="lazy" width="1921" height="1080" alt="Validation results: exact parity on a 435.8M-row fact and the migration tracker" />
+      <div class="slide-link">
+        <div>
+          <p class="eyebrow">Repo companion</p>
+          <p>Tracker screenshot and SQL pattern for object-level migration status.</p>
+        </div>
+        <div class="slide-link-actions">
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration/tree/main/tableau-migration-tracker">Tableau tracker folder</a>
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration/blob/main/tableau-migration-tracker/migration_tracker.sql">Tracker SQL</a>
+        </div>
+      </div>
+      <img src="../assets/img/shift-left/slide-10.png" loading="lazy" width="1921" height="1080" alt="Execution: orchestration rebuilt from 150 Airflow DAGs to 26 jobs, cutover managed" />
+      <div class="slide-link">
+        <div>
+          <p class="eyebrow">Repo companion</p>
+          <p>Scheduled transition-branch refresh and CI gate examples behind the cutover workflow.</p>
+        </div>
+        <div class="slide-link-actions">
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration/blob/main/gitlab-autorebase-transition-branch/transition_branch_refresh.py">Refresh script</a>
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration/blob/main/gitlab-autorebase-transition-branch/gitlab-ci.transition-branch-refresh.yml">GitLab schedule</a>
+        </div>
+      </div>
+      <img src="../assets/img/shift-left/slide-11.png" loading="lazy" width="1921" height="1080" alt="Impact: refresh lands 4 hours earlier, zero reboots, 2x faster dashboards, 50x Finance query" />
+      <img src="../assets/img/shift-left/slide-12.png" loading="lazy" width="1921" height="1080" alt="Measured impact: average extract runtime down from 4.10 to 2.22 minutes after cutover" />
+      <img src="../assets/img/shift-left/slide-13.png" loading="lazy" width="1921" height="1080" alt="Architecture: the lakehouse end to end, Iceberg on S3, dbt medallion layers, Starburst on top" />
+      <div class="slide-link">
+        <div>
+          <p class="eyebrow">Repo companion</p>
+          <p>Mermaid source for the implementation-oriented warehouse-to-lakehouse architecture.</p>
+        </div>
+        <div class="slide-link-actions">
+          <a href="https://github.com/dymytryo/warehouse-to-lakehouse-migration/blob/main/lakehouse-architecture/warehouse_to_lakehouse_flow.mmd">Architecture Mermaid</a>
+        </div>
+      </div>
+      <img src="../assets/img/shift-left/slide-14.png" loading="lazy" width="1921" height="1080" alt="Outcome: what changed, from decoupled compute to one SQL dialect" />
+    </div>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>window.lucide && lucide.createIcons();</script>
+</body>
+</html>

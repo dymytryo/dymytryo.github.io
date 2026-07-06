@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#F6F1E9"/>
+  <g fill="none" stroke="#C9BCA6" stroke-width="2">
+    <path d="M100 74 C150 74 152 125 182 125"/>
+    <path d="M100 125 H182"/>
+    <path d="M100 176 C150 176 152 125 182 125"/>
+    <path d="M244 125 H300"/>
+  </g>
+  <rect x="46" y="58" width="54" height="32" rx="7" fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5"/>
+  <rect x="46" y="109" width="54" height="32" rx="7" fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5"/>
+  <rect x="46" y="160" width="54" height="32" rx="7" fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5"/>
+  <rect x="182" y="97" width="62" height="56" rx="11" fill="#F3D9CC" stroke="#B4441E" stroke-width="1.5"/>
+  <polygon points="296,118 310,125 296,132" fill="#B4441E"/>
+  <rect x="312" y="104" width="48" height="42" rx="9" fill="#1A1712"/>
+</svg>
