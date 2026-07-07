@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="assets/style.css" />
   <style>
     .nb-h2-logo { display: inline-block; height: 32px; width: auto; vertical-align: -6px; margin-right: 10px; }
-    .nbgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 22px; }
+    .nbgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 22px; }
     .nbcard {
       display: flex; flex-direction: column;
       border: 1px solid var(--rule); border-radius: 16px; background: var(--surface);
@@ -34,6 +34,7 @@
     .nbcard:hover h3 { color: var(--accent-ink); }
     .nbcard p { margin: 7px 6px 0; color: var(--secondary); font-size: 0.95rem; line-height: 1.5; }
     .nbcard .go { display: inline-block; margin: 10px 6px 0; font-size: 0.85rem; color: var(--accent-ink); }
+    @media (max-width: 960px) { .nbgrid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 720px) { .nbgrid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -140,6 +141,12 @@
           <h3>Monte Carlo revenue simulation</h3>
           <p>How much monthly volume would an outreach campaign actually convert? 10,000-trial distributions over a merchant lead pool &mdash; with best and worst cases, not just the average.</p>
           <span class="go">Run the simulation live &rarr;</span>
+        </a>
+        <a class="nbcard" href="case-studies/loan-amortization.html">
+          <img class="nb-thumb" src="assets/img/thumb-loan-amortization.svg" alt="" width="400" height="250" />
+          <h3>Loan amortization payoff scenario</h3>
+          <p>What changes when extra principal is applied early? A fixed-rate amortization model compares baseline and accelerated payoff schedules with a live balance chart.</p>
+          <span class="go">Compare payoff scenarios &rarr;</span>
         </a>
         <a class="nbcard" href="case-studies/data-profiling.html">
           <img class="nb-thumb" src="assets/img/thumb-data-profiling.svg" alt="" width="400" height="250" />

@@ -229,6 +229,14 @@ section { margin: 64px 0; }
   .slide-link-actions { justify-content: flex-start; }
 }
 
+@media (max-width: 480px) {
+  .nav-inner { padding: 14px 18px; gap: 10px; }
+  .brand { font-size: 0.94rem; gap: 8px; }
+  .brand .mono { width: 28px; height: 28px; font-size: 13px; }
+  .nav-links { gap: 14px; }
+  .nav-cta { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; transition: none !important; }
 }

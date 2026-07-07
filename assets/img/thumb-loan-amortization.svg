@@ -1,0 +1,29 @@
+<svg width="400" height="250" viewBox="0 0 400 250" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Loan amortization payoff chart</title>
+  <desc id="desc">A stylized loan balance chart comparing baseline payoff and accelerated payoff.</desc>
+  <rect width="400" height="250" fill="#FBFAF6"/>
+  <rect x="24" y="22" width="352" height="206" rx="14" fill="#FFFFFF" stroke="#E7E1D5"/>
+  <text x="48" y="57" fill="#1A1712" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="19" font-weight="600">Loan payoff model</text>
+  <text x="48" y="81" fill="#57524A" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">$13K extra principal</text>
+
+  <line x1="58" y1="186" x2="342" y2="186" stroke="#D8D1C2"/>
+  <line x1="58" y1="108" x2="342" y2="108" stroke="#E7E1D5" stroke-dasharray="4 6"/>
+  <line x1="58" y1="147" x2="342" y2="147" stroke="#E7E1D5" stroke-dasharray="4 6"/>
+  <line x1="58" y1="96" x2="58" y2="190" stroke="#D8D1C2"/>
+
+  <path d="M58 101 C120 112 161 132 204 154 C250 177 297 186 342 186" stroke="#8B8577" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 7"/>
+  <path d="M58 101 C110 119 151 138 190 159 C228 179 267 186 306 186" stroke="#B4441E" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="306" cy="186" r="5" fill="#B4441E"/>
+  <circle cx="342" cy="186" r="4" fill="#8B8577"/>
+
+  <rect x="48" y="201" width="91" height="16" rx="8" fill="#F4F1E9"/>
+  <circle cx="58" cy="209" r="4" fill="#B4441E"/>
+  <text x="68" y="213" fill="#57524A" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10">accelerated</text>
+  <rect x="148" y="201" width="80" height="16" rx="8" fill="#F4F1E9"/>
+  <circle cx="158" cy="209" r="4" fill="#8B8577"/>
+  <text x="168" y="213" fill="#57524A" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10">baseline</text>
+
+  <rect x="254" y="46" width="88" height="54" rx="10" fill="#F4F1E9" stroke="#E7E1D5"/>
+  <text x="298" y="68" text-anchor="middle" fill="#8F3517" font-family="Georgia, serif" font-size="22" font-weight="600">34</text>
+  <text x="298" y="86" text-anchor="middle" fill="#57524A" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="10">months saved</text>
+</svg>

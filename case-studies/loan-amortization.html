@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Loan amortization payoff scenario — Dmytro Valiaiev</title>
+  <meta name="description" content="Interactive case study: a cleaned Jupyter loan amortization notebook comparing baseline and accelerated payoff schedules with early principal payments." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+  <style>
+    .loan-tool { background: var(--surface-2); border-radius: 16px; padding: 26px 26px 22px; margin-top: 26px; }
+    .loan-controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .loan-field label { display: block; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .loan-field input { width: 100%; font-family: var(--font-mono); font-size: 0.9rem; color: var(--ink); background: var(--surface); border: 1px solid var(--rule-2); border-radius: 8px; padding: 9px 10px; }
+    .loan-chart-wrap { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; margin-top: 18px; padding: 10px; }
+    #balanceChart { display: block; width: 100%; height: 320px; }
+    .loan-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
+    .loan-stats .mcard { background: var(--surface); }
+    .loan-stats .num { font-size: 1.22rem !important; }
+    .results-scroll { max-width: 100%; overflow-x: auto; }
+    .loan-note { font-size: 0.82rem; color: var(--muted); margin: 14px 0 0; }
+    details.code { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); margin: 16px 0; overflow: hidden; }
+    details.code summary { font-family: var(--font-mono); font-size: 0.82rem; color: var(--secondary); padding: 12px 18px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
+    details.code summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+    details.code[open] summary::before { transform: rotate(90deg); }
+    details.code summary:hover { color: var(--ink); }
+    details.code pre { margin: 0; padding: 4px 18px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6; color: var(--ink); }
+    .cell-out { background: var(--surface-2); border-radius: 12px; padding: 16px 20px; margin: 16px 0; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink); }
+    table.results { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.88rem; }
+    table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
+    table.results td { font-family: var(--font-mono); font-size: 0.82rem; text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+    table.results th:first-child, table.results td:first-child { text-align: left; }
+    @media (max-width: 860px) {
+      .loan-controls { grid-template-columns: repeat(2, 1fr); }
+      .loan-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 540px) {
+      .loan-controls, .loan-stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study &middot; Interactive</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Loan amortization payoff scenario</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">The original notebook was a loan calculator. The cleaned version turns it into a reproducible payoff analysis: baseline amortization, accelerated principal payments, payoff-date delta, and lifetime interest avoided.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">$2,211.66</div><div class="label">fixed monthly payment</div></div>
+        <div class="metric"><div class="num">34</div><div class="label">payments removed</div></div>
+        <div class="metric"><div class="num">$63.4K</div><div class="label">interest avoided</div></div>
+        <div class="metric"><div class="num">2050</div><div class="label">accelerated payoff year</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Jupyter</span><span>Python</span><span>standard library</span><span>scenario modeling</span><span>amortization</span>
+      </div>
+    </div>
+
+    <section aria-labelledby="try" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Live</p><h2 id="try">Compare payoff scenarios</h2></div></div>
+      <p style="color:var(--secondary);max-width:640px;margin:6px 0 0">The browser model uses the same assumptions as the cleaned notebook: monthly interest on opening balance, scheduled payment first, then extra principal.</p>
+
+      <div class="loan-tool">
+        <div class="loan-controls">
+          <div class="loan-field">
+            <label for="principal">Principal</label>
+            <input id="principal" type="number" min="1000" step="1000" value="359200" />
+          </div>
+          <div class="loan-field">
+            <label for="rate">Annual rate (%)</label>
+            <input id="rate" type="number" min="0" max="30" step="0.125" value="6.25" />
+          </div>
+          <div class="loan-field">
+            <label for="term">Term (years)</label>
+            <input id="term" type="number" min="1" max="40" step="1" value="30" />
+          </div>
+          <div class="loan-field">
+            <label for="extra1">Extra month 1</label>
+            <input id="extra1" type="number" min="0" step="500" value="4000" />
+          </div>
+          <div class="loan-field">
+            <label for="extra2">Extra month 2</label>
+            <input id="extra2" type="number" min="0" step="500" value="4000" />
+          </div>
+          <div class="loan-field">
+            <label for="extra3">Extra month 3</label>
+            <input id="extra3" type="number" min="0" step="500" value="5000" />
+          </div>
+        </div>
+
+        <div class="loan-chart-wrap"><canvas id="balanceChart" role="img" aria-label="Line chart comparing baseline and accelerated loan balances"></canvas></div>
+
+        <div class="loan-stats" aria-live="polite">
+          <div class="mcard"><div class="num" id="statPayment">$2,211.66</div><div class="label">monthly payment</div></div>
+          <div class="mcard"><div class="num" id="statMonths">34</div><div class="label">months saved</div></div>
+          <div class="mcard"><div class="num" id="statInterest">$63,387</div><div class="label">interest saved</div></div>
+          <div class="mcard"><div class="num" id="statPayoff">2050-12-01</div><div class="label">accelerated payoff</div></div>
+        </div>
+
+        <div class="results-scroll">
+          <table class="results" aria-live="polite">
+            <thead><tr><th>Scenario</th><th>Payments</th><th>Payoff</th><th>Total interest</th><th>Total paid</th></tr></thead>
+            <tbody id="scenarioRows"></tbody>
+          </table>
+        </div>
+        <p class="loan-note">This is a scenario model for analysis and education, not financial advice.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="analysis">
+      <div class="sec-head"><div><p class="eyebrow">The notebook</p><h2 id="analysis">From calculator to analysis</h2></div></div>
+
+      <div class="prose">
+        <p>The raw notebook had the right ingredients: a payment formula, an amortization schedule, and a comparison between a baseline loan and a modified loan with extra payments. The cleaned version makes the assumptions explicit and fixes the variable mismatch in the original notebook, where <code>PRINCIPAL</code> was defined but later cells referenced <code>LOAN_AMOUNT</code>.</p>
+
+        <h3>Payment formula</h3>
+        <p>The fixed payment comes from the standard amortizing-loan formula. The notebook wraps it in a small function and rounds to cents.</p>
+      </div>
+
+      <details class="code">
+        <summary>monthly_payment(principal, annual_rate, months)</summary>
+        <pre>def monthly_payment(principal: float, annual_rate: float, months: int) -&gt; float:
+    monthly_rate = annual_rate / 12
+    if monthly_rate == 0:
+        return round(principal / months, 2)
+
+    factor = (1 + monthly_rate) ** months
+    payment = principal * monthly_rate * factor / (factor - 1)
+    return round(payment, 2)</pre>
+      </details>
+
+      <div class="prose">
+        <h3>Schedule engine</h3>
+        <p>Every row tracks interest, scheduled principal, extra principal, ending balance, and cumulative interest. That makes the scenario comparison a simple difference between two schedules.</p>
+      </div>
+
+      <details class="code">
+        <summary>the monthly loop</summary>
+        <pre>interest = round(balance * monthly_rate, 2)
+scheduled_principal = min(round(payment - interest, 2), balance)
+
+remaining_after_payment = round(balance - scheduled_principal, 2)
+requested_extra = round(scenario.extra_payments.get(payment_date, 0.0), 2)
+extra_principal = min(requested_extra, remaining_after_payment)
+
+balance = round(remaining_after_payment - extra_principal, 2)
+total_interest = round(total_interest + interest, 2)</pre>
+      </details>
+
+      <div class="prose">
+        <h3>Scenario setup</h3>
+        <p>The portfolio scenario keeps the original loan amount, rate, term, and first-three-month extra-payment pattern, but names them consistently.</p>
+      </div>
+
+      <details class="code">
+        <summary>baseline vs accelerated payoff</summary>
+        <pre>LOAN_AMOUNT = 359_200.00
+INTEREST_RATE = 0.0625
+TERM_MONTHS = 30 * 12
+START_DATE = date(2023, 11, 1)
+
+EXTRA_PAYMENTS = {
+    date(2023, 11, 1): 4_000.00,
+    date(2023, 12, 1): 4_000.00,
+    date(2024, 1, 1): 5_000.00,
+}</pre>
+      </details>
+
+      <div class="cell-out">Scenario                  Payment   Months       Payoff        Interest      Total paid        Extra
+----------------------------------------------------------------------------------------------------
+Baseline                $2,211.66      360   2053-10-01     $436,993.48     $796,193.48        $0.00
+Accelerated payoff      $2,211.66      326   2050-12-01     $373,606.21     $732,806.21   $13,000.00
+
+Months saved: 34
+Interest saved: $63,387.27
+Interest saved per extra principal dollar: $4.88</div>
+
+      <div class="prose">
+        <h3>Why this is useful</h3>
+        <p>The point is not the specific loan. The reusable pattern is the side-by-side schedule: model the baseline, model the changed behavior, then quantify the payoff date and interest delta. That structure is easy to reuse for refinancing checks, payment-frequency tests, or different early-principal strategies.</p>
+      </div>
+
+      <div class="callout" style="max-width:720px">
+        <p style="margin:0"><strong>Source.</strong> The cleaned notebook and standard-library amortization script are on GitHub:
+        <a class="ulink" href="https://github.com/dymytryo/notebooks/tree/main/loan_amortization">notebooks/loan_amortization</a></p>
+      </div>
+    </section>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var START_YEAR = 2023;
+    var START_MONTH = 10;
+    var START_DAY = 1;
+
+    var principalEl = document.getElementById('principal');
+    var rateEl = document.getElementById('rate');
+    var termEl = document.getElementById('term');
+    var extraEls = [
+      document.getElementById('extra1'),
+      document.getElementById('extra2'),
+      document.getElementById('extra3')
+    ];
+    var rowsEl = document.getElementById('scenarioRows');
+    var canvas = document.getElementById('balanceChart');
+    var ctx = canvas.getContext('2d');
+
+    function round2(value) {
+      return Math.round((value + Number.EPSILON) * 100) / 100;
+    }
+
+    function asNumber(el, fallback) {
+      var value = parseFloat(el.value);
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    function addMonths(months) {
+      return new Date(Date.UTC(START_YEAR, START_MONTH + months, START_DAY));
+    }
+
+    function fmtDate(value) {
+      return value.toISOString().slice(0, 10);
+    }
+
+    function fmtUsd(value, cents) {
+      var opts = { style: 'currency', currency: 'USD', maximumFractionDigits: cents ? 2 : 0 };
+      if (cents) opts.minimumFractionDigits = 2;
+      return value.toLocaleString('en-US', opts);
+    }
+
+    function monthlyPayment(principal, annualRate, months) {
+      var monthlyRate = annualRate / 12;
+      if (monthlyRate === 0) return round2(principal / months);
+      var factor = Math.pow(1 + monthlyRate, months);
+      return round2(principal * monthlyRate * factor / (factor - 1));
+    }
+
+    function buildSchedule(principal, annualRate, years, extras) {
+      var termMonths = Math.max(1, Math.round(years * 12));
+      var payment = monthlyPayment(principal, annualRate, termMonths);
+      var monthlyRate = annualRate / 12;
+      var balance = principal;
+      var totalInterest = 0;
+      var rows = [];
+
+      for (var i = 0; i < termMonths; i++) {
+        var interest = round2(balance * monthlyRate);
+        var scheduledPrincipal = Math.min(round2(payment - interest), balance);
+        if (scheduledPrincipal <= 0) break;
+
+        var remaining = round2(balance - scheduledPrincipal);
+        var extra = Math.min(round2(extras[i] || 0), remaining);
+        balance = round2(remaining - extra);
+        totalInterest = round2(totalInterest + interest);
+
+        rows.push({
+          month: i + 1,
+          date: addMonths(i),
+          interest: interest,
+          extra: extra,
+          balance: Math.max(balance, 0),
+          totalInterest: totalInterest
+        });
+
+        if (balance <= 0) break;
+      }
+
+      return {
+        payment: payment,
+        rows: rows,
+        totalInterest: totalInterest,
+        payoffDate: rows.length ? rows[rows.length - 1].date : addMonths(0),
+        totalPaid: round2(principal + totalInterest)
+      };
+    }
+
+    function drawChart(principal, baseline, accelerated) {
+      var width = canvas.clientWidth || 760;
+      var height = 320;
+      var dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+
+      var left = 56, right = 18, top = 20, bottom = 38;
+      var plotW = width - left - right;
+      var plotH = height - top - bottom;
+      var maxMonths = Math.max(baseline.rows.length, accelerated.rows.length, 1);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
+      ctx.strokeStyle = '#E7E1D5';
+      ctx.lineWidth = 1;
+      ctx.font = '12px ui-monospace, SFMono-Regular, Menlo, monospace';
+      ctx.fillStyle = '#8B8577';
+
+      for (var i = 0; i <= 4; i++) {
+        var y = top + plotH * i / 4;
+        ctx.beginPath();
+        ctx.moveTo(left, y);
+        ctx.lineTo(width - right, y);
+        ctx.stroke();
+        var label = fmtUsd(principal * (1 - i / 4), false);
+        ctx.fillText(label, 8, y + 4);
+      }
+
+      ctx.strokeStyle = '#D8D1C2';
+      ctx.beginPath();
+      ctx.moveTo(left, top);
+      ctx.lineTo(left, top + plotH);
+      ctx.lineTo(width - right, top + plotH);
+      ctx.stroke();
+
+      function point(row) {
+        var x = left + plotW * row.month / maxMonths;
+        var y = top + plotH * (1 - row.balance / principal);
+        return [x, y];
+      }
+
+      function plot(schedule, color, dashed) {
+        var series = [{ month: 0, balance: principal }].concat(schedule.rows);
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = dashed ? 2.5 : 3.5;
+        ctx.lineCap = 'round';
+        if (dashed) ctx.setLineDash([7, 7]);
+        ctx.beginPath();
+        series.forEach(function (row, idx) {
+          var p = point(row);
+          if (idx === 0) ctx.moveTo(p[0], p[1]);
+          else ctx.lineTo(p[0], p[1]);
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      plot(baseline, '#8B8577', true);
+      plot(accelerated, '#B4441E', false);
+
+      ctx.fillStyle = '#1A1712';
+      ctx.font = '12px ui-monospace, SFMono-Regular, Menlo, monospace';
+      ctx.fillText('baseline', width - 144, top + 18);
+      ctx.fillStyle = '#8B8577';
+      ctx.fillRect(width - 168, top + 11, 16, 3);
+      ctx.fillStyle = '#1A1712';
+      ctx.fillText('accelerated', width - 144, top + 38);
+      ctx.fillStyle = '#B4441E';
+      ctx.fillRect(width - 168, top + 31, 16, 3);
+    }
+
+    function update() {
+      var principal = Math.max(1000, asNumber(principalEl, 359200));
+      var rate = Math.max(0, asNumber(rateEl, 6.25)) / 100;
+      var years = Math.max(1, asNumber(termEl, 30));
+      var extras = [
+        Math.max(0, asNumber(extraEls[0], 0)),
+        Math.max(0, asNumber(extraEls[1], 0)),
+        Math.max(0, asNumber(extraEls[2], 0))
+      ];
+
+      var baseline = buildSchedule(principal, rate, years, []);
+      var accelerated = buildSchedule(principal, rate, years, extras);
+      var monthsSaved = baseline.rows.length - accelerated.rows.length;
+      var interestSaved = round2(baseline.totalInterest - accelerated.totalInterest);
+
+      document.getElementById('statPayment').textContent = fmtUsd(baseline.payment, true);
+      document.getElementById('statMonths').textContent = monthsSaved.toLocaleString('en-US');
+      document.getElementById('statInterest').textContent = fmtUsd(interestSaved, false);
+      document.getElementById('statPayoff').textContent = fmtDate(accelerated.payoffDate);
+
+      rowsEl.innerHTML =
+        '<tr><td>Baseline</td><td>' + baseline.rows.length.toLocaleString('en-US') + '</td><td>' + fmtDate(baseline.payoffDate) + '</td><td>' + fmtUsd(baseline.totalInterest, false) + '</td><td>' + fmtUsd(baseline.totalPaid, false) + '</td></tr>' +
+        '<tr><td>Accelerated</td><td>' + accelerated.rows.length.toLocaleString('en-US') + '</td><td>' + fmtDate(accelerated.payoffDate) + '</td><td>' + fmtUsd(accelerated.totalInterest, false) + '</td><td>' + fmtUsd(accelerated.totalPaid, false) + '</td></tr>';
+
+      drawChart(principal, baseline, accelerated);
+    }
+
+    [principalEl, rateEl, termEl].concat(extraEls).forEach(function (el) {
+      el.addEventListener('input', update);
+    });
+    window.addEventListener('resize', update);
+    update();
+  }());
+  </script>
+</body>
+</html>
