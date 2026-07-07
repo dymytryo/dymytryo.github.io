@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Loan amortization payoff scenario — Dmytro Valiaiev</title>
-  <meta name="description" content="Interactive case study: a cleaned Jupyter loan amortization notebook comparing baseline and accelerated payoff schedules with early principal payments." />
+  <meta name="description" content="Interactive case study: a cleaned Jupyter loan amortization notebook comparing baseline and accelerated payoff schedules with configurable recurring principal payments." />
   <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -61,13 +61,13 @@
     <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
       <p class="eyebrow">Case study &middot; Interactive</p>
       <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Loan amortization payoff scenario</h1>
-      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">The original notebook was a loan calculator. The cleaned version turns it into a reproducible payoff analysis: baseline amortization, accelerated principal payments, payoff-date delta, and lifetime interest avoided.</p>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">The original notebook was a loan calculator. The cleaned version turns it into a reproducible payoff analysis: baseline amortization, configurable recurring principal payments, payoff-date delta, and lifetime interest avoided.</p>
 
       <div class="metrics">
         <div class="metric"><div class="num">$2,211.66</div><div class="label">fixed monthly payment</div></div>
-        <div class="metric"><div class="num">34</div><div class="label">payments removed</div></div>
-        <div class="metric"><div class="num">$63.4K</div><div class="label">interest avoided</div></div>
-        <div class="metric"><div class="num">2050</div><div class="label">accelerated payoff year</div></div>
+        <div class="metric"><div class="num">32</div><div class="label">payments removed</div></div>
+        <div class="metric"><div class="num">$59.0K</div><div class="label">interest avoided</div></div>
+        <div class="metric"><div class="num">2051</div><div class="label">accelerated payoff year</div></div>
       </div>
     </section>
 
@@ -79,7 +79,7 @@
 
     <section aria-labelledby="try" style="margin-top:44px">
       <div class="sec-head"><div><p class="eyebrow">Live</p><h2 id="try">Compare payoff scenarios</h2></div></div>
-      <p style="color:var(--secondary);max-width:640px;margin:6px 0 0">The browser model uses the same assumptions as the cleaned notebook: monthly interest on opening balance, scheduled payment first, then extra principal.</p>
+      <p style="color:var(--secondary);max-width:640px;margin:6px 0 0">The browser model uses the same assumptions as the cleaned notebook: monthly interest on opening balance, scheduled payment first, then an optional recurring extra-principal amount for N months.</p>
 
       <div class="loan-tool">
         <div class="loan-controls">
@@ -96,16 +96,16 @@
             <input id="term" type="number" min="1" max="40" step="1" value="30" />
           </div>
           <div class="loan-field">
-            <label for="extra1">Extra month 1</label>
-            <input id="extra1" type="number" min="0" step="500" value="4000" />
+            <label for="extraAmount">Extra / month</label>
+            <input id="extraAmount" type="number" min="0" step="500" value="4000" />
           </div>
           <div class="loan-field">
-            <label for="extra2">Extra month 2</label>
-            <input id="extra2" type="number" min="0" step="500" value="4000" />
+            <label for="extraMonths">Number of months</label>
+            <input id="extraMonths" type="number" min="0" max="480" step="1" value="3" />
           </div>
           <div class="loan-field">
-            <label for="extra3">Extra month 3</label>
-            <input id="extra3" type="number" min="0" step="500" value="5000" />
+            <label for="extraStart">Start payment #</label>
+            <input id="extraStart" type="number" min="1" max="480" step="1" value="1" />
           </div>
         </div>
 
@@ -113,9 +113,9 @@
 
         <div class="loan-stats" aria-live="polite">
           <div class="mcard"><div class="num" id="statPayment">$2,211.66</div><div class="label">monthly payment</div></div>
-          <div class="mcard"><div class="num" id="statMonths">34</div><div class="label">months saved</div></div>
-          <div class="mcard"><div class="num" id="statInterest">$63,387</div><div class="label">interest saved</div></div>
-          <div class="mcard"><div class="num" id="statPayoff">2050-12-01</div><div class="label">accelerated payoff</div></div>
+          <div class="mcard"><div class="num" id="statMonths">32</div><div class="label">months saved</div></div>
+          <div class="mcard"><div class="num" id="statInterest">$59,001</div><div class="label">interest saved</div></div>
+          <div class="mcard"><div class="num" id="statPayoff">2051-02-01</div><div class="label">accelerated payoff</div></div>
         </div>
 
         <div class="results-scroll">
@@ -132,7 +132,7 @@
       <div class="sec-head"><div><p class="eyebrow">The notebook</p><h2 id="analysis">From calculator to analysis</h2></div></div>
 
       <div class="prose">
-        <p>The raw notebook had the right ingredients: a payment formula, an amortization schedule, and a comparison between a baseline loan and a modified loan with extra payments. The cleaned version makes the assumptions explicit and fixes the variable mismatch in the original notebook, where <code>PRINCIPAL</code> was defined but later cells referenced <code>LOAN_AMOUNT</code>.</p>
+        <p>The raw notebook had the right ingredients: a payment formula, an amortization schedule, and a comparison between a baseline loan and a modified loan with extra payments. The cleaned version makes the assumptions explicit, adds a reusable N-month extra-payment plan, and fixes the variable mismatch in the original notebook, where <code>PRINCIPAL</code> was defined but later cells referenced <code>LOAN_AMOUNT</code>.</p>
 
         <h3>Payment formula</h3>
         <p>The fixed payment comes from the standard amortizing-loan formula. The notebook wraps it in a small function and rounds to cents.</p>
@@ -169,8 +169,34 @@ total_interest = round(total_interest + interest, 2)</pre>
       </details>
 
       <div class="prose">
+        <h3>Flexible extra-payment plan</h3>
+        <p>Instead of hard-coding month 1, month 2, and month 3, the helper below builds any consecutive N-month extra-principal schedule.</p>
+      </div>
+
+      <details class="code">
+        <summary>recurring_extra_payments(start_date, monthly_amount, number_of_months, start_month)</summary>
+        <pre>def recurring_extra_payments(
+    start_date: date,
+    monthly_amount: float,
+    number_of_months: int,
+    start_month: int = 1,
+) -&gt; dict[date, float]:
+    if start_month &lt;= 0:
+        raise ValueError("start_month must be 1 or greater")
+    if number_of_months &lt; 0:
+        raise ValueError("number_of_months cannot be negative")
+    if monthly_amount &lt; 0:
+        raise ValueError("monthly_amount cannot be negative")
+
+    return {
+        add_months(start_date, start_month - 1 + offset): monthly_amount
+        for offset in range(number_of_months)
+    }</pre>
+      </details>
+
+      <div class="prose">
         <h3>Scenario setup</h3>
-        <p>The portfolio scenario keeps the original loan amount, rate, term, and first-three-month extra-payment pattern, but names them consistently.</p>
+        <p>The portfolio scenario keeps the original loan amount, rate, and term, but makes the extra-payment strategy configurable.</p>
       </div>
 
       <details class="code">
@@ -179,22 +205,26 @@ total_interest = round(total_interest + interest, 2)</pre>
 INTEREST_RATE = 0.0625
 TERM_MONTHS = 30 * 12
 START_DATE = date(2023, 11, 1)
+EXTRA_MONTHLY_AMOUNT = 4_000.00
+EXTRA_MONTH_COUNT = 3
+EXTRA_START_MONTH = 1
 
-EXTRA_PAYMENTS = {
-    date(2023, 11, 1): 4_000.00,
-    date(2023, 12, 1): 4_000.00,
-    date(2024, 1, 1): 5_000.00,
-}</pre>
+EXTRA_PAYMENTS = recurring_extra_payments(
+    start_date=START_DATE,
+    monthly_amount=EXTRA_MONTHLY_AMOUNT,
+    number_of_months=EXTRA_MONTH_COUNT,
+    start_month=EXTRA_START_MONTH,
+)</pre>
       </details>
 
       <div class="cell-out">Scenario                  Payment   Months       Payoff        Interest      Total paid        Extra
 ----------------------------------------------------------------------------------------------------
 Baseline                $2,211.66      360   2053-10-01     $436,993.48     $796,193.48        $0.00
-Accelerated payoff      $2,211.66      326   2050-12-01     $373,606.21     $732,806.21   $13,000.00
+Accelerated payoff      $2,211.66      328   2051-02-01     $377,992.33     $737,192.33   $12,000.00
 
-Months saved: 34
-Interest saved: $63,387.27
-Interest saved per extra principal dollar: $4.88</div>
+Months saved: 32
+Interest saved: $59,001.15
+Interest saved per extra principal dollar: $4.92</div>
 
       <div class="prose">
         <h3>Why this is useful</h3>
@@ -228,11 +258,9 @@ Interest saved per extra principal dollar: $4.88</div>
     var principalEl = document.getElementById('principal');
     var rateEl = document.getElementById('rate');
     var termEl = document.getElementById('term');
-    var extraEls = [
-      document.getElementById('extra1'),
-      document.getElementById('extra2'),
-      document.getElementById('extra3')
-    ];
+    var extraAmountEl = document.getElementById('extraAmount');
+    var extraMonthsEl = document.getElementById('extraMonths');
+    var extraStartEl = document.getElementById('extraStart');
     var rowsEl = document.getElementById('scenarioRows');
     var canvas = document.getElementById('balanceChart');
     var ctx = canvas.getContext('2d');
@@ -267,8 +295,20 @@ Interest saved per extra principal dollar: $4.88</div>
       return round2(principal * monthlyRate * factor / (factor - 1));
     }
 
-    function buildSchedule(principal, annualRate, years, extras) {
-      var termMonths = Math.max(1, Math.round(years * 12));
+    function recurringExtraPayments(termMonths, monthlyAmount, numberOfMonths, startMonth) {
+      var extras = new Array(termMonths).fill(0);
+      var amount = Math.max(0, monthlyAmount);
+      var months = Math.max(0, Math.round(numberOfMonths));
+      var startIndex = Math.max(0, Math.round(startMonth) - 1);
+
+      for (var i = 0; i < months && startIndex + i < termMonths; i++) {
+        extras[startIndex + i] = amount;
+      }
+
+      return extras;
+    }
+
+    function buildSchedule(principal, annualRate, termMonths, extras) {
       var payment = monthlyPayment(principal, annualRate, termMonths);
       var monthlyRate = annualRate / 12;
       var balance = principal;
@@ -385,14 +425,16 @@ Interest saved per extra principal dollar: $4.88</div>
       var principal = Math.max(1000, asNumber(principalEl, 359200));
       var rate = Math.max(0, asNumber(rateEl, 6.25)) / 100;
       var years = Math.max(1, asNumber(termEl, 30));
-      var extras = [
-        Math.max(0, asNumber(extraEls[0], 0)),
-        Math.max(0, asNumber(extraEls[1], 0)),
-        Math.max(0, asNumber(extraEls[2], 0))
-      ];
+      var termMonths = Math.max(1, Math.round(years * 12));
+      var extras = recurringExtraPayments(
+        termMonths,
+        asNumber(extraAmountEl, 0),
+        asNumber(extraMonthsEl, 0),
+        asNumber(extraStartEl, 1)
+      );
 
-      var baseline = buildSchedule(principal, rate, years, []);
-      var accelerated = buildSchedule(principal, rate, years, extras);
+      var baseline = buildSchedule(principal, rate, termMonths, []);
+      var accelerated = buildSchedule(principal, rate, termMonths, extras);
       var monthsSaved = baseline.rows.length - accelerated.rows.length;
       var interestSaved = round2(baseline.totalInterest - accelerated.totalInterest);
 
@@ -408,7 +450,7 @@ Interest saved per extra principal dollar: $4.88</div>
       drawChart(principal, baseline, accelerated);
     }
 
-    [principalEl, rateEl, termEl].concat(extraEls).forEach(function (el) {
+    [principalEl, rateEl, termEl, extraAmountEl, extraMonthsEl, extraStartEl].forEach(function (el) {
       el.addEventListener('input', update);
     });
     window.addEventListener('resize', update);
