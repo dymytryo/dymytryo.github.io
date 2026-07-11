@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#F6F1E9"/>
+  <!-- spreadsheet grid -->
+  <g fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5">
+    <rect x="40" y="60" width="110" height="130" rx="8"/>
+  </g>
+  <g stroke="#D8CDBA" stroke-width="1.5">
+    <line x1="40" y1="92" x2="150" y2="92"/>
+    <line x1="40" y1="124" x2="150" y2="124"/>
+    <line x1="40" y1="156" x2="150" y2="156"/>
+    <line x1="95" y1="60" x2="95" y2="190"/>
+  </g>
+  <!-- enriched cells coming back -->
+  <g fill="#F3D9CC">
+    <rect x="99" y="96" width="47" height="24" rx="4"/>
+    <rect x="99" y="128" width="47" height="24" rx="4"/>
+    <rect x="99" y="160" width="47" height="24" rx="4"/>
+  </g>
+  <!-- bidirectional arrows -->
+  <g fill="none" stroke="#B4441E" stroke-width="2.5">
+    <path d="M162 100 C 200 100 210 100 244 100"/>
+    <path d="M244 150 C 210 150 200 150 162 150"/>
+  </g>
+  <g fill="#B4441E">
+    <path d="M244 94 L 256 100 L 244 106 Z"/>
+    <path d="M162 144 L 150 150 L 162 156 Z"/>
+  </g>
+  <!-- data lake -->
+  <g fill="#FFFFFF" stroke="#8A7B63" stroke-width="1.5">
+    <ellipse cx="305" cy="78" rx="52" ry="14"/>
+    <path d="M253 78 v70 a52 14 0 0 0 104 0 v-70" fill="#FFFFFF"/>
+  </g>
+  <g stroke="#8A7B63" stroke-width="1.5" fill="none">
+    <path d="M253 113 a52 14 0 0 0 104 0"/>
+    <path d="M253 148 a52 14 0 0 0 104 0"/>
+  </g>
+  <!-- clock: scheduled run -->
+  <g stroke="#B4441E" stroke-width="2" fill="#F6F1E9">
+    <circle cx="200" cy="205" r="18"/>
+  </g>
+  <g stroke="#B4441E" stroke-width="2" fill="none">
+    <path d="M200 195 v10 h8"/>
+  </g>
+</svg>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The spreadsheet that joined the data lake — Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: operational reverse ETL. An ops team's Google Sheet, enriched daily from the data lake via Athena, written back through the Sheets API, persisted to Parquet, and reported in QuickSight." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+  <style>
+    details.code { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); margin: 16px 0; overflow: hidden; }
+    details.code summary { font-family: var(--font-mono); font-size: 0.82rem; color: var(--secondary); padding: 12px 18px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
+    details.code summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+    details.code[open] summary::before { transform: rotate(90deg); }
+    details.code summary:hover { color: var(--ink); }
+    details.code pre { margin: 0; padding: 4px 18px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6; color: var(--ink); }
+    figure.chart { margin: 22px 0; border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 1px 4px rgba(26,23,18,0.06); }
+    figure.chart img { display: block; width: 100%; height: auto; }
+    figure.chart figcaption { font-size: 0.85rem; color: var(--secondary); padding: 12px 18px; border-top: 1px solid var(--rule); background: var(--surface-2); }
+    table.results { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.9rem; }
+    table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
+    table.results td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    table.results td:first-child { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; color: var(--accent-ink); }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study &middot; Data engineering</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">The spreadsheet that joined the data lake</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">The operations team resolved merchant and payor issues daily and tracked all of it in a Google Sheet &mdash; the only record of outreach, cut off from the platform. Instead of forcing ops into a new tool, this pipeline made the sheet a governed citizen of the lake: enriched on a schedule, persisted to Parquet, reported in QuickSight.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">5</div><div class="label">lake sources joined into every record</div></div>
+        <div class="metric"><div class="num">~1,200</div><div class="label">rows enriched per write-back batch</div></div>
+        <div class="metric"><div class="num">daily</div><div class="label">scheduled run &mdash; zero manual queries after launch</div></div>
+        <div class="metric"><div class="num">2-way</div><div class="label">sheet &rarr; lake and lake &rarr; sheet, one loop</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Python</span><span>Sheets API</span><span>Athena</span><span>S3 / Parquet</span><span>SageMaker</span><span>QuickSight</span>
+      </div>
+    </div>
+
+    <section aria-labelledby="arch" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Architecture</p><h2 id="arch">One loop, six stages</h2></div></div>
+
+      <figure class="chart">
+        <img src="../assets/img/reverse-etl/automation-workflow.png" alt="Architecture: Google Sheet read via API, enriched from Athena, written back to the sheet and persisted to the data lake, visualized in QuickSight, scheduled by CloudWatch" loading="lazy" />
+        <figcaption>The enrichment loop: the ops team keeps working in their sheet; everything else is automated around them.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>The design constraint that matters: <strong>the ops team never changes tools.</strong> The sheet stays their working surface. The pipeline reads it, fills in what the lake knows, writes the context back into their columns, and appends the curated records to a Parquet table where QuickSight and management reporting live.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="stages">
+      <div class="sec-head"><div><p class="eyebrow">The pipeline</p><h2 id="stages">Stage by stage</h2></div></div>
+
+      <div class="prose">
+        <h3>1 &mdash; Extract: the sheet, through the front door</h3>
+        <p>OAuth 2.0 with a cached refresh token keeps the daily scheduled run non-interactive after a one-time consent. The working range comes back as a DataFrame with the header row promoted.</p>
+      </div>
+
+      <details class="code">
+        <summary>sheets_client.read_sheet</summary>
+        <pre>result = (
+    service.spreadsheets()
+    .values()
+    .get(spreadsheetId=sheet_id, range=sheet_range)
+    .execute()
+)
+values = result.get("values", [])
+
+df = pd.DataFrame(values[1:], columns=values[0])</pre>
+      </details>
+
+      <div class="prose">
+        <h3>2 &mdash; Enrich: targeted Athena lookups, batched by design</h3>
+        <p>Only rows missing context trigger queries. Their keys are chunked into bounded <code>IN</code>-lists before interpolation &mdash; Athena caps query-string size, and unbounded lists are how daily jobs die on month-end volume. Five lookup results (transactions, payor details, success KPIs, contacts, merchant details) merge onto the base frame by <code>record_id</code>.</p>
+      </div>
+
+      <details class="code">
+        <summary>lake_enrichment: batching + merge</summary>
+        <pre>def batched(keys, size=BATCH_SIZE):
+    for start in range(0, len(keys), size):
+        yield keys[start : start + size]
+
+frames = [base] + [f for f in lookups if not f.empty]
+enriched = reduce(
+    lambda left, right: pd.merge(left, right, on=["record_id"], how="left"),
+    frames,
+)</pre>
+      </details>
+
+      <div class="prose">
+        <h3>3 &mdash; Write back: the ops team sees the answers appear</h3>
+        <p>Enriched columns land back in the sheet via clear-then-append against the working range &mdash; the manual lookup queries analysts used to run on request simply stopped existing.</p>
+        <h3>4 &mdash; Persist: bootstrap once, append forever</h3>
+        <p>A one-time DDL sequence registers the schema as an external table over a seed CSV, then converts it to a SNAPPY-compressed Parquet CTAS table &mdash; decoupling the curated dataset from the seed file and cutting Athena scan cost. Daily runs append new records only, keyed on record identity + contact date, so a rerun cannot double-count an outreach.</p>
+      </div>
+
+      <details class="code">
+        <summary>sql: Parquet CTAS + idempotent append</summary>
+        <pre>CREATE TABLE IF NOT EXISTS lake.ops_merchant_contact_info
+WITH (format = 'Parquet', parquet_compression = 'SNAPPY') AS
+SELECT * FROM lake.ops_merchant_contact_seed;
+
+INSERT INTO lake.ops_merchant_contact_info
+SELECT s.*
+FROM lake.ops_merchant_contact_staging s
+LEFT JOIN lake.ops_merchant_contact_info t
+  ON  t.merchant_id       = s.merchant_id
+  AND t.last_contact_date = s.last_contact_date
+WHERE t.merchant_id IS NULL;</pre>
+      </details>
+
+      <div class="prose">
+        <h3>5 &mdash; Serve: reporting that sends itself</h3>
+        <p>QuickSight reads the Parquet table for the management dashboard; KPI threshold alerts and a scheduled mail-out replaced the ad-hoc status requests.</p>
+        <h3>6 &mdash; Orchestrate: a cron, honestly</h3>
+        <p>An EventBridge cron triggers the SageMaker notebook job daily, with failures logged in full. A notebook on a cron is the right prototype and the wrong endgame &mdash; the production path is a containerized job on Airflow/MWAA, and that migration is stated in the repo rather than hand-waved.</p>
+      </div>
+
+      <div class="prose">
+        <h3>Design decisions</h3>
+      </div>
+
+      <table class="results">
+        <thead><tr><th>Decision</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Parquet CTAS over external CSV</td><td>Columnar + SNAPPY cuts scan cost; the table stops depending on a bucket object someone can delete.</td></tr>
+          <tr><td>bounded IN-list batching</td><td>Athena query strings have hard size limits; chunking keys keeps month-end volume from killing the run.</td></tr>
+          <tr><td>append keyed on id + date</td><td>Idempotency by construction &mdash; reruns are safe, no dedup cleanup jobs later.</td></tr>
+          <tr><td>token cache outside the repo</td><td>One-time consent, then non-interactive daily auth; production home is Secrets Manager.</td></tr>
+          <tr><td>sheet stays the UI</td><td>Zero adoption cost. The pipeline adapts to the team, not the other way around.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout" style="max-width:720px">
+        <p style="margin:0"><strong>Source.</strong> Sanitized code (Sheets OAuth client, batched enrichment, daily pipeline), the full DDL sequence, and the architecture diagram are on GitHub:
+        <a class="ulink" href="https://github.com/dymytryo/operations-analytics/tree/main/projects/sheets-to-lake-reverse-etl">operations-analytics/sheets-to-lake-reverse-etl</a></p>
+      </div>
+
+    </section>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+</body>
+</html>
