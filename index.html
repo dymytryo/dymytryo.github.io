@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="assets/style.css" />
   <style>
     .nb-h2-logo { display: inline-block; height: 32px; width: auto; vertical-align: -6px; margin-right: 10px; }
-    .nbgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 22px; }
+    .nbgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; margin-top: 22px; }
     .nbcard {
       display: flex; flex-direction: column;
       border: 1px solid var(--rule); border-radius: 16px; background: var(--surface);
@@ -153,6 +153,12 @@
           <h3>Profile before you trust it</h3>
           <p>Automated data profiling as an ingestion gate: a deliberately messy contact extract, 10 quality alerts raised automatically, every finding mapped to a concrete rule.</p>
           <span class="go">Explore the live report &rarr;</span>
+        </a>
+        <a class="nbcard" href="case-studies/supply-chain-exploration.html">
+          <img class="nb-thumb" src="assets/img/thumb-supply-chain.svg" alt="" width="400" height="250" />
+          <h3>Three tables, no data dictionary</h3>
+          <p>A freight forwarder&rsquo;s undocumented extracts, explored end-to-end in DuckDB: profiling SQL generated from DDL, key forensics, and lasso-isolated revenue drivers.</p>
+          <span class="go">Read the exploration &rarr;</span>
         </a>
       </div>
     </section>

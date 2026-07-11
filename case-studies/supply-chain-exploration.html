@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Three tables, no data dictionary — Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: a time-boxed exploration of a freight forwarder's raw extracts in DuckDB — SQL profiling generated from DDL, key forensics, one-big-table assembly, lasso revenue-driver decomposition, margin and retention analysis." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+  <style>
+    details.code { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); margin: 16px 0; overflow: hidden; }
+    details.code summary { font-family: var(--font-mono); font-size: 0.82rem; color: var(--secondary); padding: 12px 18px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
+    details.code summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+    details.code[open] summary::before { transform: rotate(90deg); }
+    details.code summary:hover { color: var(--ink); }
+    details.code pre { margin: 0; padding: 4px 18px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6; color: var(--ink); }
+    .cell-out { background: var(--surface-2); border-radius: 12px; padding: 16px 20px; margin: 16px 0; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink); }
+    figure.chart { margin: 22px 0; border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 1px 4px rgba(26,23,18,0.06); }
+    figure.chart img { display: block; width: 100%; height: auto; }
+    figure.chart figcaption { font-size: 0.85rem; color: var(--secondary); padding: 12px 18px; border-top: 1px solid var(--rule); background: var(--surface-2); }
+    table.results { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.9rem; }
+    table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
+    table.results td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    table.results td:first-child { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; color: var(--accent-ink); }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study &middot; Notebook</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Three tables, no data dictionary</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">A freight forwarder&rsquo;s raw extracts &mdash; shipments, containers, customers &mdash; handed over with zero documentation and a time box. This notebook is the full arc: build a local DuckDB sandbox, profile every column, untangle the keys, assemble one big table, and walk out with revenue drivers, margin structure, and retention health.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">578K</div><div class="label">shipment records in the raw extracts</div></div>
+        <div class="metric"><div class="num">3 &times; 0</div><div class="label">tables &times; pages of documentation</div></div>
+        <div class="metric"><div class="num">&rsquo;22&rarr;&rsquo;23</div><div class="label">net-revenue change decomposed by lasso</div></div>
+        <div class="metric"><div class="num">4-way</div><div class="label">monthly retention flow: new / retained / churned / resurrected</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Jupyter</span><span>DuckDB</span><span>SQL</span><span>wise-pizza</span><span>Python</span>
+      </div>
+    </div>
+
+    <section aria-labelledby="analysis" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">The notebook</p><h2 id="analysis">The analysis, step by step</h2></div></div>
+
+      <div class="prose">
+        <h3>Step 1 &mdash; a warehouse sandbox that costs nothing</h3>
+        <p>The extracts came out of Snowflake, but exploration shouldn&rsquo;t burn warehouse credits or scan quotas. The CSVs load into an in-memory DuckDB instance, which speaks close-enough SQL and keeps every query local and reproducible.</p>
+      </div>
+
+      <details class="code">
+        <summary>load CSVs into DuckDB</summary>
+        <pre>import duckdb
+conn = duckdb.connect()
+
+conn.execute("CREATE TABLE containers AS SELECT * FROM read_csv_auto('data/CONTAINERS.csv')")
+conn.execute("CREATE TABLE customers  AS SELECT * FROM read_csv_auto('data/CUSTOMERS.csv')")
+conn.execute("CREATE TABLE files      AS SELECT * FROM read_csv_auto('data/FILES.csv')")</pre>
+      </details>
+
+      <div class="prose">
+        <h3>Step 2 &mdash; profiling queries written by a function, not by hand</h3>
+        <p>Instead of hand-writing summary statistics for every column, a helper parses each table&rsquo;s Snowflake <code>CREATE TABLE</code> DDL and generates the profiling SQL &mdash; counts, distincts, null rates, min/max per column &mdash; so the same pattern scales to any number of tables. A one-line <code>ProfileReport</code> cross-checks the findings.</p>
+      </div>
+
+      <details class="code">
+        <summary>DDL &rarr; profiling SQL generator</summary>
+        <pre>def construct_profiling_query_from_table_def(table_def):
+    """Constructs a profiling SQL query from a Snowflake CREATE TABLE definition."""
+    column_pattern = re.compile(r"(\w+)\s+([\w\(\),]+)", re.IGNORECASE)
+    columns = column_pattern.findall(table_def)
+    for column_name, column_type in columns:
+        # per column: COUNT, COUNT DISTINCT, null count, null %,
+        # and MIN/MAX for dates, numerics, and string lengths
+        ...
+
+models = [
+    {"model_name": "containers", "table_def": "create or replace TRANSIENT TABLE CONTAINERS (...)"},
+    {"model_name": "customers",  "table_def": "..."},
+    {"model_name": "files",      "table_def": "..."},
+]
+print(generate_profiling_queries(models))</pre>
+      </details>
+
+      <div class="prose">
+        <h3>Step 3 &mdash; key forensics</h3>
+        <p>Profiling surfaced the real schema: <code>global_file_id</code> is a true primary key on <code>files</code>; <code>containers</code> carries duplicate rows and NULL container ids; and the two key relationships have orphans in <em>both</em> directions &mdash; customers who ship but aren&rsquo;t in <code>customers</code>, and customers with no shipments at all. Duplicate container records get resolved by keeping the most frequent value per feature, collapsing the table to one row per shipment before any join.</p>
+      </div>
+
+      <details class="code">
+        <summary>duplicate resolution &mdash; most frequent feature per column</summary>
+        <pre>WITH cte_feature_count AS (
+    SELECT global_file_id, load_terms, vessel, voyage, quantity, teu,
+           COUNT(*) AS feature_frequency
+    FROM containers
+    GROUP BY 1, 2, 3, 4, 5, 6
+),
+ranked AS (
+    SELECT *, ROW_NUMBER() OVER (
+        PARTITION BY global_file_id
+        ORDER BY feature_frequency DESC
+    ) AS rank
+    FROM cte_feature_count
+)
+SELECT * FROM ranked WHERE rank = 1</pre>
+      </details>
+
+      <div class="prose">
+        <h3>Step 4 &mdash; one big table, then insights</h3>
+        <p>With keys validated and containers reduced, a three-way join builds the OBT that all downstream analysis runs on. First question for any business: what moved revenue? <a class="ulink" href="https://github.com/transferwise/wise-pizza" target="_blank" rel="noopener">wise-pizza</a> with a lasso solver decomposes the 2022&rarr;2023 net-revenue change into the segments that attracted or detracted the most.</p>
+      </div>
+
+      <details class="code">
+        <summary>lasso revenue-driver decomposition</summary>
+        <pre>iteration1 = explain_changes_in_totals(
+    df1=pre_data,            # 2022 feature matrix
+    df2=data,                # 2023 feature matrix
+    dims=['PRODUCT', 'CARRIERNAME', 'DESTINATION', 'ORIGIN',
+          'CLIENT_NAME', 'VERTICAL', 'load_terms', 'quantity',
+          'number_of_containers'],
+    total_name='net_revenue_total',
+    size_name='transaction_total',
+    max_depth=1, max_segments=10,
+    how='totals', solver='lasso',
+)</pre>
+      </details>
+
+      <figure class="chart">
+        <img src="../assets/img/supply-chain/revenue-drivers.png" alt="Waterfall decomposition of 2022 to 2023 net revenue change by segment" loading="lazy" />
+        <figcaption>Biggest attractors and detractors of year-over-year net revenue, isolated by lasso regression over product, carrier, lane, vertical, and load-term segments. (Charts rendered from the bundled sample.)</figcaption>
+      </figure>
+
+      <div class="prose">
+        <h3>Step 5 &mdash; margin structure by transaction size</h3>
+        <p>Binning transactions into revenue deciles and tracking average profit margin per bin over time shows the pattern that matters for targeting: <strong>smaller orders carry the strongest margins</strong>. If revenue optimization is the question, the answer starts with identifying who those small-order customers are and winning more of them.</p>
+      </div>
+
+      <figure class="chart">
+        <img src="../assets/img/supply-chain/margin-deciles.png" alt="Average profit margin percentage over time by transaction size decile" loading="lazy" />
+        <figcaption>Average profit margin over time by transaction-size decile &mdash; margin concentrates in the smaller bins.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <h3>Step 6 &mdash; customer-base health</h3>
+        <p>A month-pair SQL model classifies every customer-month into new, retained, churned, or resurrected &mdash; the standard growth-accounting view, built entirely in SQL on the OBT.</p>
+      </div>
+
+      <figure class="chart">
+        <img src="../assets/img/supply-chain/retention-flow.png" alt="Monthly retention flow: new, retained, churned, resurrected customer units" loading="lazy" />
+        <figcaption>Monthly retention flow. Business units are a strong health indicator; weighting by revenue is the natural next slice.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <h3>Findings &rarr; recommendations</h3>
+      </div>
+
+      <table class="results">
+        <thead><tr><th>What the exploration found</th><th>What it means for the business</th></tr></thead>
+        <tbody>
+          <tr><td>duplicate container rows</td><td>Dedup strategy needed at ingestion &mdash; resolved here by most-frequent-feature; formalize before the database scales.</td></tr>
+          <tr><td>orphans in both key directions</td><td>The <code>customers</code> extract is truncated; joins must be outer and metrics must state their denominator.</td></tr>
+          <tr><td>revenue drivers isolated by segment</td><td>Specific products, lanes, and verticals attract or detract revenue &mdash; account plans can start from the decomposition, not intuition.</td></tr>
+          <tr><td>margin concentrates in small orders</td><td>Target audience for revenue optimization is smaller orders: identify those contributors and engage similar segments.</td></tr>
+          <tr><td>retention flow assembled in SQL</td><td>Ready to transfer to a BI tool and slice by segment for the next round of insights.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout" style="max-width:720px">
+        <p style="margin:0"><strong>Source &amp; data.</strong> The executed notebook, an anonymized ~5% customer sample (referential quirks preserved), and the sampling script are on GitHub:
+        <a class="ulink" href="https://github.com/dymytryo/notebooks/tree/main/supply_chain_exploration">notebooks/supply_chain_exploration</a></p>
+      </div>
+
+    </section>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+</body>
+</html>
