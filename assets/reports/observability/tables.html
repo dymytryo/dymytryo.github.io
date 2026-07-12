@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tables · Data Platform Observability</title>
+<style>
+* { box-sizing: border-box; margin: 0; }
+body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+       background: #F5F7FA; color: #1B2A3A; padding-bottom: 40px; }
+.topbar { background: #13294B; color: #fff; padding: 18px 32px;
+          display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+.topbar .brand { font-weight: 700; letter-spacing: 2px; }
+.topbar .brand span { color: #F7A800; }
+.topbar .title { font-size: 20px; font-weight: 600; }
+.topbar .asof { margin-left: auto; font-size: 13px; opacity: .75; }
+.nav { background: #0D1E38; padding: 8px 32px; font-size: 13px; }
+.nav a { color: #B9C6D8; text-decoration: none; margin-right: 22px; }
+.nav a.here { color: #F7A800; font-weight: 600; }
+.wrap { max-width: 1080px; margin: 26px auto 0; padding: 0 24px; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.kpi { background: #fff; border-radius: 10px; padding: 18px 20px 14px;
+       box-shadow: 0 1px 3px rgba(19,41,75,.12); }
+.kpi .label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+              color: #5A6B7E; }
+.kpi .value { font-size: 40px; font-weight: 700; color: #13294B;
+              line-height: 1.15; }
+.kpi .sub { font-size: 13px; color: #5A6B7E; }
+.chip { display: inline-block; font-size: 12px; font-weight: 600;
+        border-radius: 10px; padding: 1px 8px; margin-top: 6px; }
+.chip.up-good, .chip.down-good { background: #E4F2E7; color: #2E8540; }
+.chip.up-bad, .chip.down-bad { background: #F9E5E2; color: #C0392B; }
+.chip.flat { background: #EDF1F5; color: #5A6B7E; }
+.section { background: #fff; border-radius: 10px; margin-top: 22px;
+           padding: 20px 24px; box-shadow: 0 1px 3px rgba(19,41,75,.12); }
+.section h2 { font-size: 15px; color: #13294B; text-transform: uppercase;
+              letter-spacing: 1px; margin-bottom: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; color: #5A6B7E; font-weight: 600; font-size: 12px;
+     text-transform: uppercase; letter-spacing: .5px;
+     border-bottom: 2px solid #E4E9EF; padding: 7px 10px; }
+td { border-bottom: 1px solid #EDF1F5; padding: 7px 10px; }
+tr:last-child td { border-bottom: none; }
+.pill { display: inline-block; border-radius: 9px; font-size: 11.5px;
+        font-weight: 600; padding: 1px 9px; }
+.pill.pass, .pill.resolved, .pill.on-time { background: #E4F2E7; color: #2E8540; }
+.pill.warn, .pill.at-risk, .pill.medium { background: #FBF0DC; color: #C77700; }
+.pill.fail, .pill.active, .pill.late, .pill.high { background: #F9E5E2; color: #C0392B; }
+.pill.low, .pill.escalated { background: #EDF1F5; color: #5A6B7E; }
+.bar { background: #EDF1F5; border-radius: 4px; height: 8px; width: 140px;
+       display: inline-block; vertical-align: middle; }
+.bar i { display: block; height: 8px; border-radius: 4px; background: #13294B; }
+.footer { max-width: 1080px; margin: 26px auto 0; padding: 0 24px;
+          font-size: 12px; color: #5A6B7E; }
+.spark { margin-top: 4px; }
+</style></head>
+<body>
+<div class="topbar"><div class="brand">SUN<span>RUN</span></div>
+<div class="title">Data Platform Observability · Tables</div>
+<div class="asof">as of 2026-07-12 07:00 UTC</div></div>
+<div class="nav"><a href="users.html" class="">Users · Stewards</a><a href="tables.html" class="here">Tables</a><a href="tests.html" class="">Tests</a><a href="alerts.html" class="">Alerts</a></div>
+<div class="wrap">
+<div class="kpis"><div class="kpi"><div class="label">Total Tables</div><div class="value">50</div><div class="sub">RAW, STAGING, INTERMEDIATE, MARTS</div><span class="chip flat">— 0.0 WoW</span></div><div class="kpi"><div class="label">Monitored Tables</div><div class="value">36</div><div class="sub">72.0% of the catalog</div><span class="chip flat">— 0.0 WoW</span><svg class="spark" width="120" height="28" viewBox="0 0 120 28"><polyline fill="none" stroke="#13294B" stroke-width="2" points="0.0,26.0 4.4,26.0 8.9,26.0 13.3,26.0 17.8,26.0 22.2,26.0 26.7,26.0 31.1,6.0 35.6,6.0 40.0,6.0 44.4,6.0 48.9,6.0 53.3,6.0 57.8,6.0 62.2,6.0 66.7,6.0 71.1,6.0 75.6,6.0 80.0,6.0 84.4,6.0 88.9,6.0 93.3,6.0 97.8,6.0 102.2,6.0 106.7,6.0 111.1,6.0 115.6,6.0 120.0,6.0"/></svg></div><div class="kpi"><div class="label">Owner Defined</div><div class="value">86.0%</div><div class="sub">43 of 50 tables</div><span class="chip flat">— 0.0 WoW</span><svg class="spark" width="120" height="28" viewBox="0 0 120 28"><polyline fill="none" stroke="#13294B" stroke-width="2" points="0.0,26.0 4.4,26.0 8.9,26.0 13.3,26.0 17.8,26.0 22.2,16.0 26.7,16.0 31.1,16.0 35.6,16.0 40.0,16.0 44.4,16.0 48.9,16.0 53.3,16.0 57.8,16.0 62.2,16.0 66.7,16.0 71.1,16.0 75.6,16.0 80.0,6.0 84.4,6.0 88.9,6.0 93.3,6.0 97.8,6.0 102.2,6.0 106.7,6.0 111.1,6.0 115.6,6.0 120.0,6.0"/></svg></div><div class="kpi"><div class="label">Metadata Defined</div><div class="value">78.0%</div><div class="sub">39 tables described</div><span class="chip up-good">▲ 6.0 pt WoW</span><svg class="spark" width="120" height="28" viewBox="0 0 120 28"><polyline fill="none" stroke="#13294B" stroke-width="2" points="0.0,26.0 4.4,26.0 8.9,26.0 13.3,26.0 17.8,26.0 22.2,18.0 26.7,18.0 31.1,18.0 35.6,18.0 40.0,18.0 44.4,18.0 48.9,18.0 53.3,18.0 57.8,18.0 62.2,18.0 66.7,18.0 71.1,18.0 75.6,18.0 80.0,18.0 84.4,18.0 88.9,18.0 93.3,18.0 97.8,18.0 102.2,18.0 106.7,6.0 111.1,6.0 115.6,6.0 120.0,6.0"/></svg></div></div>
+<div class="section"><h2>Drill down · coverage by schema</h2>
+<table><tr><th>Schema</th><th>Tables</th><th>Owner defined</th>
+<th>Metadata defined</th><th>Monitored</th></tr><tr><td>RAW</td><td>18</td><td>100% <div class="bar"><i style="width:100%"></i></div></td><td>89% <div class="bar"><i style="width:89%"></i></div></td><td>100% <div class="bar"><i style="width:100%"></i></div></td></tr><tr><td>STAGING</td><td>18</td><td>78% <div class="bar"><i style="width:78%"></i></div></td><td>67% <div class="bar"><i style="width:67%"></i></div></td><td>22% <div class="bar"><i style="width:22%"></i></div></td></tr><tr><td>INTERMEDIATE</td><td>6</td><td>67% <div class="bar"><i style="width:67%"></i></div></td><td>67% <div class="bar"><i style="width:67%"></i></div></td><td>100% <div class="bar"><i style="width:100%"></i></div></td></tr><tr><td>MARTS</td><td>8</td><td>88% <div class="bar"><i style="width:88%"></i></div></td><td>88% <div class="bar"><i style="width:88%"></i></div></td><td>100% <div class="bar"><i style="width:100%"></i></div></td></tr></table></div>
+<div class="section"><h2>Drill down · governance coverage metrics</h2>
+<table><tr><th>Metric</th><th>Today</th><th></th><th>Week over week</th></tr>
+<tr><td>Columns described</td><td>71.8%</td><td><div class="bar"><i style="width:72%"></i></div></td><td><span class="chip up-good">▲ 5.8 pt WoW</span></td></tr><tr><td>Tables with primary key</td><td>80.0%</td><td><div class="bar"><i style="width:80%"></i></div></td><td><span class="chip flat">— 0.0 WoW</span></td></tr><tr><td>Foreign keys documented</td><td>78.8%</td><td><div class="bar"><i style="width:79%"></i></div></td><td><span class="chip flat">— 0.0 WoW</span></td></tr><tr><td>Reference tables documented</td><td>100.0%</td><td><div class="bar"><i style="width:100%"></i></div></td><td><span class="chip flat">— 0.0 WoW</span></td></tr><tr><td>Monitored tables with steward</td><td>88.9%</td><td><div class="bar"><i style="width:89%"></i></div></td><td><span class="chip flat">— 0.0 WoW</span></td></tr></table></div>
+<div class="section"><h2>Governance gaps (missing owner or description)</h2>
+<table><tr><th>Table</th><th>Domain</th><th>Owner</th><th>Description</th>
+<th>Monitored</th></tr><tr><td>RAW.battery_readings</td><td>fleet</td><td>fleet-analytics</td><td>missing</td><td>yes</td></tr><tr><td>RAW.gateway_heartbeats</td><td>fleet</td><td>data-platform</td><td>missing</td><td>yes</td></tr><tr><td>STAGING.stg_salesforce__contacts</td><td>sales</td><td>analytics-engineering</td><td>missing</td><td>no</td></tr><tr><td>STAGING.stg_fleet_telemetry__battery_readings</td><td>fleet</td><td>—</td><td>missing</td><td>yes</td></tr><tr><td>STAGING.stg_fleet_telemetry__gateway_heartbeats</td><td>fleet</td><td>—</td><td>missing</td><td>yes</td></tr><tr><td>STAGING.stg_billing__payments</td><td>billing</td><td>analytics-engineering</td><td>missing</td><td>no</td></tr><tr><td>STAGING.stg_field_service__appointments</td><td>field_service</td><td>—</td><td>missing</td><td>no</td></tr><tr><td>STAGING.STG_REFERENCE__UTILITY_RATES</td><td>reference</td><td>—</td><td>missing</td><td>no</td></tr><tr><td>INTERMEDIATE.int_battery_health</td><td>fleet</td><td>—</td><td>missing</td><td>yes</td></tr><tr><td>INTERMEDIATE.int_lead_funnel</td><td>sales</td><td>—</td><td>missing</td><td>yes</td></tr><tr><td>MARTS.customer_snapshot</td><td>customer</td><td>—</td><td>missing</td><td>yes</td></tr></table></div></div>
+<div class="footer">Scorecard generated by scripts/build_scorecards.py from
+results/ · demo runs on deterministic mock data (see data/README note in the
+repo) · checks defined in config/checks.yml</div>
+</body></html>

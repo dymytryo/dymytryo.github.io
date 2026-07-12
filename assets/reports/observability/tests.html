@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tests · Data Platform Observability</title>
+<style>
+* { box-sizing: border-box; margin: 0; }
+body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+       background: #F5F7FA; color: #1B2A3A; padding-bottom: 40px; }
+.topbar { background: #13294B; color: #fff; padding: 18px 32px;
+          display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+.topbar .brand { font-weight: 700; letter-spacing: 2px; }
+.topbar .brand span { color: #F7A800; }
+.topbar .title { font-size: 20px; font-weight: 600; }
+.topbar .asof { margin-left: auto; font-size: 13px; opacity: .75; }
+.nav { background: #0D1E38; padding: 8px 32px; font-size: 13px; }
+.nav a { color: #B9C6D8; text-decoration: none; margin-right: 22px; }
+.nav a.here { color: #F7A800; font-weight: 600; }
+.wrap { max-width: 1080px; margin: 26px auto 0; padding: 0 24px; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.kpi { background: #fff; border-radius: 10px; padding: 18px 20px 14px;
+       box-shadow: 0 1px 3px rgba(19,41,75,.12); }
+.kpi .label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+              color: #5A6B7E; }
+.kpi .value { font-size: 40px; font-weight: 700; color: #13294B;
+              line-height: 1.15; }
+.kpi .sub { font-size: 13px; color: #5A6B7E; }
+.chip { display: inline-block; font-size: 12px; font-weight: 600;
+        border-radius: 10px; padding: 1px 8px; margin-top: 6px; }
+.chip.up-good, .chip.down-good { background: #E4F2E7; color: #2E8540; }
+.chip.up-bad, .chip.down-bad { background: #F9E5E2; color: #C0392B; }
+.chip.flat { background: #EDF1F5; color: #5A6B7E; }
+.section { background: #fff; border-radius: 10px; margin-top: 22px;
+           padding: 20px 24px; box-shadow: 0 1px 3px rgba(19,41,75,.12); }
+.section h2 { font-size: 15px; color: #13294B; text-transform: uppercase;
+              letter-spacing: 1px; margin-bottom: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; color: #5A6B7E; font-weight: 600; font-size: 12px;
+     text-transform: uppercase; letter-spacing: .5px;
+     border-bottom: 2px solid #E4E9EF; padding: 7px 10px; }
+td { border-bottom: 1px solid #EDF1F5; padding: 7px 10px; }
+tr:last-child td { border-bottom: none; }
+.pill { display: inline-block; border-radius: 9px; font-size: 11.5px;
+        font-weight: 600; padding: 1px 9px; }
+.pill.pass, .pill.resolved, .pill.on-time { background: #E4F2E7; color: #2E8540; }
+.pill.warn, .pill.at-risk, .pill.medium { background: #FBF0DC; color: #C77700; }
+.pill.fail, .pill.active, .pill.late, .pill.high { background: #F9E5E2; color: #C0392B; }
+.pill.low, .pill.escalated { background: #EDF1F5; color: #5A6B7E; }
+.bar { background: #EDF1F5; border-radius: 4px; height: 8px; width: 140px;
+       display: inline-block; vertical-align: middle; }
+.bar i { display: block; height: 8px; border-radius: 4px; background: #13294B; }
+.footer { max-width: 1080px; margin: 26px auto 0; padding: 0 24px;
+          font-size: 12px; color: #5A6B7E; }
+.spark { margin-top: 4px; }
+</style></head>
+<body>
+<div class="topbar"><div class="brand">SUN<span>RUN</span></div>
+<div class="title">Data Platform Observability · Tests</div>
+<div class="asof">as of 2026-07-12 07:00 UTC</div></div>
+<div class="nav"><a href="users.html" class="">Users · Stewards</a><a href="tables.html" class="">Tables</a><a href="tests.html" class="here">Tests</a><a href="alerts.html" class="">Alerts</a></div>
+<div class="wrap">
+<div class="kpis"><div class="kpi"><div class="label">Total Checks</div><div class="value">101</div><div class="sub">graded instances across 4 measurements</div><span class="chip flat">— 0.0 WoW</span></div><div class="kpi"><div class="label">Passing Checks</div><div class="value">90</div><div class="sub">89.1% pass rate</div><span class="chip down-bad">▼ 4.0 pt WoW</span><svg class="spark" width="120" height="28" viewBox="0 0 120 28"><polyline fill="none" stroke="#13294B" stroke-width="2" points="0.0,18.5 4.4,18.5 8.9,18.5 13.3,18.5 17.8,18.5 22.2,18.5 26.7,24.5 31.1,13.4 35.6,13.4 40.0,11.6 44.4,13.4 48.9,9.8 53.3,17.1 57.8,24.5 62.2,26.0 66.7,20.5 71.1,9.6 75.6,11.5 80.0,9.6 84.4,9.6 88.9,9.6 93.3,9.6 97.8,11.5 102.2,15.1 106.7,6.0 111.1,6.0 115.6,13.8 120.0,16.9"/></svg></div><div class="kpi"><div class="label">Metrics</div><div class="value">12</div><div class="sub">tracked against targets</div><span class="chip flat">— 0.0 WoW</span></div><div class="kpi"><div class="label">Passing Metrics</div><div class="value">9</div><div class="sub">of 12 metric targets met</div><span class="chip up-good">▲ 12.5% WoW</span></div></div>
+<div class="section"><h2>Drill down · results by measurement</h2>
+<table><tr><th>Measurement</th><th>Checks</th><th>Pass</th><th>Warn</th>
+<th>Fail</th><th>Pass rate</th></tr><tr><td>Availability</td><td>21</td><td>18</td><td>1</td><td>2</td><td>86% <div class="bar"><i style="width:86%"></i></div></td></tr><tr><td>Completeness</td><td>38</td><td>36</td><td>0</td><td>2</td><td>95% <div class="bar"><i style="width:95%"></i></div></td></tr><tr><td>Consistency</td><td>8</td><td>5</td><td>0</td><td>3</td><td>62% <div class="bar"><i style="width:62%"></i></div></td></tr><tr><td>Expectations</td><td>34</td><td>31</td><td>2</td><td>1</td><td>91% <div class="bar"><i style="width:91%"></i></div></td></tr></table></div>
+<div class="section"><h2>Drill down · failing and warning checks</h2>
+<table><tr><th>Check</th><th>Instance</th><th>Status</th><th>Severity</th>
+<th>Owner</th><th>Value</th></tr><tr><td><code>AV-01</code> source_freshness</td><td>reference.utility_rates</td><td><span class="pill fail">fail</span></td><td><span class="pill high">high</span></td><td>data-platform</td><td>1500.0</td></tr><tr><td><code>CM-07</code> naming_convention_compliance</td><td>MARTS.customer_snapshot</td><td><span class="pill fail">fail</span></td><td><span class="pill low">low</span></td><td>analytics-engineering</td><td></td></tr><tr><td><code>CM-07</code> naming_convention_compliance</td><td>STAGING.STG_REFERENCE__UTILITY_RATES</td><td><span class="pill fail">fail</span></td><td><span class="pill low">low</span></td><td>analytics-engineering</td><td></td></tr><tr><td><code>CN-02</code> string_case_consistency</td><td>string_case_consistency</td><td><span class="pill fail">fail</span></td><td><span class="pill low">low</span></td><td>analytics-engineering</td><td>97.75</td></tr><tr><td><code>CN-01</code> numeric_precision_consistency</td><td>battery_soc_pct</td><td><span class="pill fail">fail</span></td><td><span class="pill medium">medium</span></td><td>analytics-engineering</td><td>2.0</td></tr><tr><td><code>CN-03</code> conflicting_field_definitions</td><td>conflicting_field_definitions</td><td><span class="pill fail">fail</span></td><td><span class="pill medium">medium</span></td><td>data-governance</td><td>1.0</td></tr><tr><td><code>EX-02</code> row_count_vs_history</td><td>fleet_telemetry.site_daily_production</td><td><span class="pill fail">fail</span></td><td><span class="pill medium">medium</span></td><td>data-platform</td><td>8.52</td></tr><tr><td><code>AV-02</code> pct_sources_on_time</td><td>pct_sources_on_time</td><td><span class="pill fail">fail</span></td><td>—</td><td>data-platform</td><td>88.9</td></tr><tr><td><code>AV-01</code> source_freshness</td><td>fleet_telemetry.gateway_heartbeats</td><td><span class="pill warn">warn</span></td><td><span class="pill high">high</span></td><td>data-platform</td><td>85.0</td></tr><tr><td><code>EX-02</code> row_count_vs_history</td><td>salesforce.contracts</td><td><span class="pill warn">warn</span></td><td><span class="pill medium">medium</span></td><td>data-platform</td><td>2.18</td></tr><tr><td><code>EX-02</code> row_count_vs_history</td><td>salesforce.contacts</td><td><span class="pill warn">warn</span></td><td><span class="pill medium">medium</span></td><td>data-platform</td><td>2.01</td></tr></table></div>
+<div class="section"><h2>Metric block · tracked metrics vs targets</h2>
+<table><tr><th>Metric</th><th>Measurement</th><th>Value</th><th>Target</th>
+<th>Status</th></tr><tr><td><code>AV-02</code> pct_sources_on_time</td><td>availability</td><td>88.9</td><td><code>>= 95</code></td><td><span class="pill fail">fail</span></td></tr><tr><td><code>AV-03</code> avg_delay_minutes</td><td>availability</td><td>5.3</td><td><code><= 30</code></td><td><span class="pill pass">pass</span></td></tr><tr><td><code>AV-04</code> avg_data_age_hours</td><td>availability</td><td>11.3</td><td><code><= 24</code></td><td><span class="pill pass">pass</span></td></tr><tr><td><code>CM-01</code> pct_tables_with_owner</td><td>completeness</td><td>86.0</td><td><code>>= 85</code></td><td><span class="pill pass">pass</span></td></tr><tr><td><code>CM-02</code> pct_tables_with_description</td><td>completeness</td><td>78.0</td><td><code>>= 75</code></td><td><span class="pill pass">pass</span></td></tr><tr><td><code>CM-03</code> pct_columns_with_description</td><td>completeness</td><td>71.8</td><td><code>>= 70</code></td><td><span class="pill pass">pass</span></td></tr><tr><td><code>CM-04</code> pct_tables_with_primary_key</td><td>completeness</td><td>80.0</td><td><code>>= 80</code></td><td><span class="pill pass">pass</span></td></tr><tr><td><code>CM-05</code> pct_fk_relationships_documented</td><td>completeness</td><td>78.8</td><td><code>>= 75</code></td><td><span class="pill pass">pass</span></td></tr><tr><td><code>CM-06</code> pct_reference_tables_documented</td><td>completeness</td><td>100.0</td><td><code>>= 100</code></td><td><span class="pill pass">pass</span></td></tr><tr><td><code>CN-02</code> string_case_consistency</td><td>consistency</td><td>97.75</td><td><code>>= 99</code></td><td><span class="pill fail">fail</span></td></tr><tr><td><code>CN-03</code> conflicting_field_definitions</td><td>consistency</td><td>1.0</td><td><code><= 0</code></td><td><span class="pill fail">fail</span></td></tr><tr><td><code>CN-04</code> pct_rows_default_vs_expectation</td><td>consistency</td><td>0.56</td><td><code><= 2</code></td><td><span class="pill pass">pass</span></td></tr></table></div></div>
+<div class="footer">Scorecard generated by scripts/build_scorecards.py from
+results/ · demo runs on deterministic mock data (see data/README note in the
+repo) · checks defined in config/checks.yml</div>
+</body></html>

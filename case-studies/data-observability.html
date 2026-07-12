@@ -22,7 +22,16 @@
     table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
     table.results td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
     table.results td:first-child { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; color: var(--accent-ink); }
-    .shot { border: 1px solid var(--rule); border-radius: 12px; width: 100%; height: auto; margin: 16px 0; display: block; }
+    .report-frame-wrap { border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; background: var(--surface); margin-top: 22px; box-shadow: 0 1px 4px rgba(26,23,18,0.06); }
+    .report-frame-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--rule); background: var(--surface-2); flex-wrap: wrap; }
+    .report-frame-bar .lab { font-family: var(--font-mono); font-size: 0.78rem; color: var(--secondary); }
+    .report-frame-bar a { font-size: 0.82rem; border: 1px solid var(--rule-2); border-radius: 999px; padding: 5px 12px; color: var(--ink); white-space: nowrap; }
+    .report-frame-bar a:hover { border-color: var(--accent); color: var(--accent-ink); }
+    .sc-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .sc-tabs button { font-family: var(--font-mono); font-size: 0.78rem; border: 1px solid var(--rule-2); border-radius: 999px; padding: 5px 14px; background: transparent; color: var(--secondary); cursor: pointer; }
+    .sc-tabs button:hover { border-color: var(--accent); color: var(--accent-ink); }
+    .sc-tabs button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+    #scorecardFrame { width: 100%; height: 720px; border: 0; display: block; background: #fff; }
   </style>
 </head>
 <body>
@@ -154,10 +163,21 @@ fires = (worst == "fail" and prev in ("pass", "warn")) or \
       <div class="prose">
         <p>Alerts group by source system (a telemetry outage is one incident, not three pages), warn-to-fail escalates and re-pages, severity picks the channel (PagerDuty for high, Slack otherwise), and recipients are the owning team&rsquo;s on-call plus the table&rsquo;s steward. Coverage metrics never page at all &mdash; they trend on scorecards. Result: a month with a real outage, a double load, and a stale feed produced 17 alerts, not 170.</p>
         <h3>Step 6 &mdash; four scorecards, one per audience</h3>
-        <p><strong>Tests</strong> for the platform team (what is failing right now, by measurement, with owners), <strong>Alerts</strong> for on-call (open incidents, age, routing, noisiest checks), <strong>Tables</strong> for governance (coverage by schema, gaps ranked), <strong>Users &middot; Stewards</strong> for the operating model (who owns what, where stewardship is missing). Every number traces back to a graded check result &mdash; the scorecard layer never recomputes anything.</p>
+        <p><strong>Tests</strong> for the platform team (what is failing right now, by measurement, with owners), <strong>Alerts</strong> for on-call (open incidents, age, routing, noisiest checks), <strong>Tables</strong> for governance (coverage by schema, gaps ranked), <strong>Users &middot; Stewards</strong> for the operating model (who owns what, where stewardship is missing). Every number traces back to a graded check result &mdash; the scorecard layer never recomputes anything. The scorecards below are live: the actual HTML output of the repo&rsquo;s demo run, with week-over-week deltas, sparklines, and drill-downs.</p>
       </div>
 
-      <img class="shot" src="../assets/img/observability-tests-scorecard.png" alt="Tests scorecard: 101 checks graded, 90 passing, 12 metrics tracked, 9 targets met" width="1000" height="540" />
+      <div class="report-frame-wrap">
+        <div class="report-frame-bar">
+          <div class="sc-tabs" role="tablist" aria-label="Scorecards">
+            <button class="on" data-sc="tests">Tests</button>
+            <button data-sc="alerts">Alerts</button>
+            <button data-sc="tables">Tables</button>
+            <button data-sc="users">Users &middot; Stewards</button>
+          </div>
+          <a id="scorecardOpen" href="../assets/reports/observability/tests.html" target="_blank" rel="noopener">Open full screen &nearr;</a>
+        </div>
+        <iframe id="scorecardFrame" src="../assets/reports/observability/tests.html" loading="lazy" title="Live observability scorecards: tests, alerts, tables, users"></iframe>
+      </div>
 
       <div class="prose">
         <h3>What a month looks like</h3>
@@ -191,5 +211,22 @@ fires = (worst == "fail" and prev in ("pass", "warn")) or \
       <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
     </div>
   </footer>
+
+  <script>
+    (function () {
+      var frame = document.getElementById('scorecardFrame');
+      var open = document.getElementById('scorecardOpen');
+      var tabs = document.querySelectorAll('.sc-tabs button');
+      tabs.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          tabs.forEach(function (b) { b.classList.remove('on'); });
+          btn.classList.add('on');
+          var url = '../assets/reports/observability/' + btn.dataset.sc + '.html';
+          frame.src = url;
+          open.href = url;
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
