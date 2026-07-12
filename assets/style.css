@@ -166,6 +166,27 @@ section { margin: 64px 0; }
 .role .org { color: var(--accent-ink); }
 .role .dates { font-family: var(--font-mono); font-size: 0.82rem; color: var(--muted); text-align: right; white-space: nowrap; }
 .role .desc { grid-column: 1 / -1; color: var(--secondary); font-size: 0.98rem; margin-top: 4px; }
+.role-details { grid-column: 1 / -1; margin-top: 8px; }
+.role-details summary {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--accent-ink); cursor: pointer; font-size: 0.9rem; font-weight: 500;
+  list-style: none;
+}
+.role-details summary::marker { content: ""; }
+.role-details summary::-webkit-details-marker { display: none; }
+.role-details summary::before {
+  content: "+"; display: inline-grid; place-items: center;
+  width: 18px; height: 18px; border: 1px solid var(--rule-2); border-radius: 50%;
+  font-family: var(--font-mono); font-size: 0.78rem; line-height: 1;
+}
+.role-details[open] summary::before { content: "-"; }
+.impact-list {
+  margin: 10px 0 0; padding-left: 20px;
+  color: var(--secondary); font-size: 0.96rem; line-height: 1.55;
+}
+.impact-list li { margin: 0; }
+.impact-list a { color: var(--accent-ink); border-bottom: 1px solid var(--accent); }
+.impact-list a:hover { color: var(--ink); }
 
 /* ---------- education / certs ---------- */
 .stack-list { list-style: none; padding: 0; margin: 16px 0 0; }
