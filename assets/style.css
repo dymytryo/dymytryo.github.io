@@ -185,8 +185,14 @@ section { margin: 64px 0; }
   color: var(--secondary); font-size: 0.96rem; line-height: 1.55;
 }
 .impact-list li { margin: 0; }
-.impact-list a { color: var(--accent-ink); border-bottom: 1px solid var(--accent); }
-.impact-list a:hover { color: var(--ink); }
+.impact-list strong { color: var(--ink); font-weight: 600; }
+.impact-list .case-arrow {
+  display: inline-grid; place-items: center; vertical-align: 1px;
+  width: 22px; height: 22px; margin-left: 4px;
+  border: 1px solid var(--rule-2); border-radius: 50%;
+  color: var(--accent-ink); font-size: 0.9rem; line-height: 1;
+}
+.impact-list .case-arrow:hover { border-color: var(--accent); color: var(--ink); }
 
 /* ---------- education / certs ---------- */
 .stack-list { list-style: none; padding: 0; margin: 16px 0 0; }
