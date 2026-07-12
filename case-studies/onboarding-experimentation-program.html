@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AP/AR onboarding experimentation program — Dmytro Valiaiev</title>
-  <meta name="description" content="Case study: the experimentation program behind a B2B payments AP/AR onboarding funnel — assignment and exposure pipelines, a governed metrics layer, and a Tableau readout framework supporting 18+ A/B tests and $23M+ in attributed annual impact." />
+  <title>A/B testing for customer onboarding — Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: the data platform behind an A/B testing program for AP/AR customer onboarding at a B2B payments fintech. LaunchDarkly assignment data synced through Fivetran, events routed through Segment, dbt experiment marts on the data lake, and a templated Tableau readout framework behind 18+ experiments." />
   <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,9 +12,10 @@
   <link rel="stylesheet" href="../assets/style.css" />
   <style>
     .figure { margin: 22px 0 0; }
-    .figure img { width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 1px 4px rgba(26,23,18,0.06); }
+    .figure svg { width: 100%; height: auto; display: block; }
+    .figure .panel { border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); padding: 10px; }
     .figure figcaption { font-size: 0.82rem; color: var(--muted); margin-top: 8px; }
-    .formula { background: var(--surface-2); border-radius: 12px; padding: 18px 22px; margin: 18px 0; font-size: 1.02rem; overflow-x: auto; white-space: nowrap; }
+    .formula { background: var(--surface-2); border-radius: 12px; padding: 18px 22px; margin: 14px 0; font-size: 1.02rem; overflow-x: auto; white-space: nowrap; }
     .formula em { font-family: var(--font-display); font-style: italic; }
     .frac { display: inline-block; vertical-align: middle; text-align: center; margin: 0 3px; }
     .frac .top { display: block; border-bottom: 1px solid var(--ink); padding: 0 6px 2px; }
@@ -24,6 +25,13 @@
     .exp-results { margin: 10px 0 0; padding-left: 20px; color: var(--secondary); }
     .exp-results li { margin: 3px 0; }
     .exp-results strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+    .stage p { margin: 6px 0 0; color: var(--secondary); }
+    /* chart text */
+    .c-num { font-family: var(--font-display); font-weight: 550; fill: var(--ink); }
+    .c-lab { font-family: var(--font-sans); fill: var(--secondary); }
+    .c-mut { font-family: var(--font-sans); fill: var(--muted); }
+    .c-ink { font-family: var(--font-sans); fill: var(--ink); }
+    .c-acc { fill: var(--accent); }
   </style>
 </head>
 <body>
@@ -44,8 +52,8 @@
 
     <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
       <p class="eyebrow">Case study</p>
-      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Test, learn, roll out: the AP/AR onboarding experimentation program</h1>
-      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">At a B2B payments fintech, I engineered the data pipelines, experimentation models, and Tableau reporting framework behind 18+ A/B tests on the new-customer onboarding funnel — turning &ldquo;we think this helps activation&rdquo; into measured, control-versus-treatment answers that shipped.</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">A/B testing for customer onboarding</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">A B2B payments fintech ran 18+ A/B tests on its new-customer onboarding funnel. I built the data platform they ran on: pipelines landing LaunchDarkly assignment data and product events in the data lake through Fivetran and Segment, dbt models turning exposures and outcomes into experiment readouts, and the templated Tableau framework the program reported from.</p>
 
       <div class="metrics">
         <div class="metric"><div class="num">19</div><div class="label">major experiments tracked</div></div>
@@ -57,154 +65,318 @@
 
     <div class="prose">
       <div class="tags" style="margin-top:16px">
-        <span>LaunchDarkly</span><span>Tableau</span><span>Mixpanel</span><span>Pendo</span><span>Redshift</span><span>dbt</span><span>Airflow</span><span>SQL</span><span>Python</span>
+        <span>LaunchDarkly</span><span>Fivetran</span><span>Segment</span><span>Redshift</span><span>dbt</span><span>Airflow</span><span>Tableau</span><span>Mixpanel</span><span>Pendo</span>
       </div>
     </div>
 
     <figure class="figure" style="margin-top:36px">
-      <img src="../assets/img/onboarding-experiments/kpi-cards.png" loading="lazy" width="1600" height="533" alt="Program KPI cards: 19 major experiments tracked, 15 concluded wins, 76% rollout rate, 22% average 30-day activation lift, 10% average paid conversion lift, $23.4M estimated annual impact" />
-      <figcaption>The program scorecard. Dashboards on this page are reconstructions of the Tableau originals; all figures are directionally accurate but adjusted to protect confidential performance data.</figcaption>
+      <svg viewBox="0 0 1600 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Program scorecard: 19 experiments tracked, 15 concluded wins, 76% rollout rate, 22% average 30-day activation lift, 10% average paid conversion lift, $23.4M estimated annual impact">
+        <g>
+          <rect x="10" y="10" width="250" height="220" rx="14" fill="#FFFFFF" stroke="#E7E1D5" stroke-width="1.5"/>
+          <text x="34" y="62" class="c-lab" font-size="15">Experiments</text>
+          <text x="34" y="82" class="c-lab" font-size="15">tracked</text>
+          <text x="34" y="150" class="c-num" font-size="46">19</text>
+          <text x="34" y="196" font-size="14"><tspan class="c-acc">&#9650;</tspan><tspan class="c-lab" dx="6">+2 vs prior period</tspan></text>
+        </g>
+        <g>
+          <rect x="276" y="10" width="250" height="220" rx="14" fill="#FFFFFF" stroke="#E7E1D5" stroke-width="1.5"/>
+          <text x="300" y="62" class="c-lab" font-size="15">Concluded</text>
+          <text x="300" y="82" class="c-lab" font-size="15">wins</text>
+          <text x="300" y="150" class="c-num" font-size="46">15</text>
+          <text x="300" y="196" font-size="14"><tspan class="c-acc">&#9650;</tspan><tspan class="c-lab" dx="6">+2 vs prior period</tspan></text>
+        </g>
+        <g>
+          <rect x="542" y="10" width="250" height="220" rx="14" fill="#FFFFFF" stroke="#E7E1D5" stroke-width="1.5"/>
+          <text x="566" y="62" class="c-lab" font-size="15">Win-to-rollout</text>
+          <text x="566" y="82" class="c-lab" font-size="15">rate</text>
+          <text x="566" y="150" class="c-num" font-size="46">76%</text>
+          <text x="566" y="196" font-size="14"><tspan class="c-acc">&#9650;</tspan><tspan class="c-lab" dx="6">+6pp vs prior period</tspan></text>
+        </g>
+        <g>
+          <rect x="808" y="10" width="250" height="220" rx="14" fill="#FFFFFF" stroke="#E7E1D5" stroke-width="1.5"/>
+          <text x="832" y="62" class="c-lab" font-size="15">30-day activation</text>
+          <text x="832" y="82" class="c-lab" font-size="15">lift (avg)</text>
+          <text x="832" y="150" class="c-num" font-size="46">22%</text>
+          <text x="832" y="196" font-size="14"><tspan class="c-acc">&#9650;</tspan><tspan class="c-lab" dx="6">+4pp vs prior period</tspan></text>
+        </g>
+        <g>
+          <rect x="1074" y="10" width="250" height="220" rx="14" fill="#FFFFFF" stroke="#E7E1D5" stroke-width="1.5"/>
+          <text x="1098" y="62" class="c-lab" font-size="15">Paid conversion</text>
+          <text x="1098" y="82" class="c-lab" font-size="15">lift (avg)</text>
+          <text x="1098" y="150" class="c-num" font-size="46">10%</text>
+          <text x="1098" y="196" font-size="14"><tspan class="c-acc">&#9650;</tspan><tspan class="c-lab" dx="6">+2pp vs prior period</tspan></text>
+        </g>
+        <g>
+          <rect x="1340" y="10" width="250" height="220" rx="14" fill="#FFFFFF" stroke="#E7E1D5" stroke-width="1.5"/>
+          <text x="1364" y="62" class="c-lab" font-size="15">Est. annual</text>
+          <text x="1364" y="82" class="c-lab" font-size="15">impact</text>
+          <text x="1364" y="150" class="c-num" font-size="46">$23.4M</text>
+          <text x="1364" y="196" font-size="14"><tspan class="c-acc">&#9650;</tspan><tspan class="c-lab" dx="6">+29% vs prior period</tspan></text>
+        </g>
+      </svg>
+      <figcaption>The program scorecard.</figcaption>
     </figure>
 
     <section aria-labelledby="context" style="margin-top:44px">
-      <div class="sec-head"><div><p class="eyebrow">Context</p><h2 id="context">One funnel, two products, thirty days</h2></div></div>
+      <div class="sec-head"><div><p class="eyebrow">Context</p><h2 id="context">The onboarding funnel</h2></div></div>
       <div class="prose">
-        <p>The platform automates <strong>accounts payable</strong> (AP — the bills a business owes its vendors) and <strong>accounts receivable</strong> (AR — the invoices it is owed). New organizations start in a trial: they connect a bank account, add vendors or customers, and — if onboarding works — pay their first bill or send their first invoice. That first month decides everything: an org that pays a vendor in its first 30 days is dramatically more likely to convert to a paid plan and stay.</p>
-        <p>Growth owned the funnel; Analytics &amp; DS defined the experimentation practices; my job was the measurement machinery — so that when anyone changed onboarding task ordering, &ldquo;prompt to pay&rdquo; nudges, bank-verification messaging, or network discovery, the effect could be read cleanly off a dashboard instead of argued about in a meeting.</p>
+        <p>The platform automates accounts payable (AP: the bills a business owes its vendors) and accounts receivable (AR: the invoices it is owed). New customers start in a trial. They connect a bank account, add vendors, and pay a first bill on the AP side or send a first invoice on the AR side. Paying a first bill within 30 days is the strongest predictor of paid conversion and retention, so onboarding is designed to get customers to that action.</p>
+        <p>Growth owned the funnel. Analytics and Data Science defined the experimentation standards. Every proposed change to onboarding, from task ordering to payment prompts to network discovery, was judged on two agreed metrics: activation (a customer completing the first core money movement within 7 or 30 days) and paid conversion (a trial customer becoming a paying subscriber).</p>
+        <p>Measuring that many concurrent tests reliably is a data problem before it is a statistics problem. Assignment data, behavioral events, and revenue outcomes lived in different systems; each experiment needed them joined the same way, checked the same way, and reported the same way. That platform is what this case study covers.</p>
       </div>
       <figure class="figure">
-        <img src="../assets/img/onboarding-experiments/onboarding-funnel.png" loading="lazy" width="1448" height="1086" alt="Onboarding funnel for a trailing quarter: 102,340 sign-ups, 77,412 setup started, 50,128 bank verified, 23,112 first bill paid, 17,318 activated within 7 days, 9,074 converted to paid — 8.9% overall" />
-        <figcaption>The instrumented funnel for a trailing quarter. Every experiment on this page moves one or more of these stage-to-stage conversions.</figcaption>
+        <div class="panel">
+        <svg viewBox="0 0 940 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Onboarding funnel for a trailing quarter: 102,340 sign-ups; 77,412 setup started (75.6%); 50,128 bank verified (64.8%); 23,112 first bill paid (46.1%); 17,318 activated in 7 days (74.9%); 9,074 converted to paid (52.4%); 8.9% overall">
+          <text x="20" y="34" class="c-mut" font-size="12" letter-spacing="2">STAGE</text>
+          <text x="770" y="34" class="c-mut" font-size="12" letter-spacing="2">STAGE CONV.</text>
+          <line x1="20" y1="46" x2="920" y2="46" stroke="#E7E1D5"/>
+          <g>
+            <text x="20" y="86" class="c-ink" font-size="15">Sign-up</text>
+            <rect x="190" y="66" width="500" height="32" rx="5" fill="#B4441E"/>
+            <text x="700" y="88" class="c-num" font-size="16">102,340</text>
+            <text x="920" y="88" text-anchor="end" class="c-lab" font-size="15">100%</text>
+          </g>
+          <g>
+            <text x="20" y="146" class="c-ink" font-size="15">Setup started</text>
+            <rect x="190" y="126" width="378" height="32" rx="5" fill="#B4441E" opacity="0.82"/>
+            <text x="578" y="148" class="c-num" font-size="16">77,412</text>
+            <text x="920" y="148" text-anchor="end" class="c-lab" font-size="15">75.6%</text>
+          </g>
+          <g>
+            <text x="20" y="206" class="c-ink" font-size="15">Bank verified</text>
+            <rect x="190" y="186" width="245" height="32" rx="5" fill="#B4441E" opacity="0.64"/>
+            <text x="445" y="208" class="c-num" font-size="16">50,128</text>
+            <text x="920" y="208" text-anchor="end" class="c-lab" font-size="15">64.8%</text>
+          </g>
+          <g>
+            <text x="20" y="266" class="c-ink" font-size="15">First bill paid</text>
+            <rect x="190" y="246" width="113" height="32" rx="5" fill="#B4441E" opacity="0.46"/>
+            <text x="313" y="268" class="c-num" font-size="16">23,112</text>
+            <text x="920" y="268" text-anchor="end" class="c-lab" font-size="15">46.1%</text>
+          </g>
+          <g>
+            <text x="20" y="326" class="c-ink" font-size="15">Activated (7-day)</text>
+            <rect x="190" y="306" width="85" height="32" rx="5" fill="#B4441E" opacity="0.34"/>
+            <text x="285" y="328" class="c-num" font-size="16">17,318</text>
+            <text x="920" y="328" text-anchor="end" class="c-lab" font-size="15">74.9%</text>
+          </g>
+          <g>
+            <text x="20" y="386" class="c-ink" font-size="15">Converted (paid)</text>
+            <rect x="190" y="366" width="44" height="32" rx="5" fill="#B4441E" opacity="0.25"/>
+            <text x="244" y="388" class="c-num" font-size="16">9,074</text>
+            <text x="920" y="388" text-anchor="end" class="c-lab" font-size="15">52.4%</text>
+          </g>
+          <line x1="20" y1="408" x2="920" y2="408" stroke="#E7E1D5"/>
+          <text x="20" y="432" class="c-lab" font-size="14">Overall conversion, sign-up to paid: <tspan class="c-num" font-size="14">8.9%</tspan></text>
+        </svg>
+        </div>
+        <figcaption>The instrumented funnel for a trailing quarter. Each experiment targets one or more of these stage-to-stage conversion rates.</figcaption>
       </figure>
     </section>
 
-    <section aria-labelledby="ab" style="margin-top:44px">
-      <div class="sec-head"><div><p class="eyebrow">Method</p><h2 id="ab">A/B testing, briefly</h2></div></div>
+    <section aria-labelledby="arch" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Architecture</p><h2 id="arch">How experiment data reached the lake</h2></div></div>
       <div class="prose">
-        <p>An A/B test is a randomized controlled experiment: eligible organizations are randomly assigned to a <strong>control</strong> group (current experience) or a <strong>treatment</strong> group (the change), and the same metric is compared across both. Randomization is what buys causality — both groups face the same seasonality, marketing pushes, and product bugs, so a difference in outcomes can be attributed to the change itself rather than to whoever happened to receive it.</p>
-        <p>Each experiment here was designed before launch: a written hypothesis, a primary metric, guardrail metrics, segment definitions (ICP — ideal customer profile — versus all orgs), and a pre-committed sample size. For conversion-style metrics, the readout is a <strong>two-proportion z-test</strong>. With <em>p̂</em><sub>T</sub>, <em>p̂</em><sub>C</sub> the observed rates and <em>n</em><sub>T</sub>, <em>n</em><sub>C</sub> the group sizes:</p>
+        <p>Experiments were assigned and served with LaunchDarkly feature flags: targeting rules split eligible customers into control and treatment, and every flag evaluation produced an exposure event. Two managed pipelines carried everything downstream. Segment routed exposure and product events from the web and mobile apps to the data lake and to the product-analytics tools (Mixpanel for funnels, Pendo for in-app guides). Fivetran synced the structured side on a schedule: LaunchDarkly flag and experiment definitions, plus Mixpanel and Pendo exports, landing as raw schemas next to the event stream.</p>
       </div>
 
-      <div class="formula" aria-label="Two-proportion z-test statistic">
-        <em>z</em> &nbsp;=&nbsp;
-        <span class="frac"><span class="top"><em>p̂</em><sub>T</sub> &minus; <em>p̂</em><sub>C</sub></span><span class="bot">&#8730;<span class="rad"><em>p̄</em>(1&minus;<em>p̄</em>)&thinsp;(1/<em>n</em><sub>T</sub> + 1/<em>n</em><sub>C</sub>)</span></span></span>
-        &nbsp;,&nbsp;&nbsp; <em>p̄</em> = <span class="frac"><span class="top"><em>x</em><sub>T</sub> + <em>x</em><sub>C</sub></span><span class="bot"><em>n</em><sub>T</sub> + <em>n</em><sub>C</sub></span></span>
-      </div>
+      <figure class="figure" style="max-width:940px">
+        <svg viewBox="0 0 980 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Architecture diagram: LaunchDarkly sends exposure events through Segment and flag metadata through Fivetran; both land in the data lake, are modeled with dbt and Airflow, and are served in Tableau">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 1 L 9 5 L 0 9 z" fill="#B4441E"/>
+            </marker>
+          </defs>
+          <style>
+            .box { fill: #F4F1E9; stroke: #D8D1C2; stroke-width: 1.5; }
+            .t { font: 600 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; fill: #1A1712; }
+            .s { font: 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; fill: #57524A; }
+            .lbl { font: 11px ui-monospace, 'SF Mono', Menlo, monospace; fill: #8A7B63; }
+            .flow { stroke: #B4441E; stroke-width: 1.75; fill: none; marker-end: url(#arr); }
+          </style>
 
-      <div class="prose">
-        <p>Under the null hypothesis <em>H</em><sub>0</sub>: <em>p</em><sub>T</sub> = <em>p</em><sub>C</sub>, <em>z</em> is approximately standard normal, so |<em>z</em>| &ge; 1.96 means the lift is significant at &alpha; = 0.05 — and the reported lift always carries its 95% confidence interval, (<em>p̂</em><sub>T</sub> &minus; <em>p̂</em><sub>C</sub>) &plusmn; 1.96&thinsp;·&thinsp;SE. Just as important is the sample size committed <em>before</em> launch, from the minimum detectable effect (MDE) — the smallest lift worth acting on:</p>
-      </div>
+          <text x="294" y="20" text-anchor="middle" class="lbl">product events: web &amp; mobile</text>
+          <line x1="294" y1="28" x2="294" y2="48" class="flow"/>
 
-      <div class="formula" aria-label="Sample size per arm">
-        <em>n</em> per arm &nbsp;=&nbsp;
-        <span class="frac"><span class="top">(<em>z</em><sub>1&minus;&alpha;/2</sub> + <em>z</em><sub>1&minus;&beta;</sub>)<sup>2</sup> &middot; [<em>p</em><sub>1</sub>(1&minus;<em>p</em><sub>1</sub>) + <em>p</em><sub>2</sub>(1&minus;<em>p</em><sub>2</sub>)]</span><span class="bot">(<em>p</em><sub>2</sub> &minus; <em>p</em><sub>1</sub>)<sup>2</sup></span></span>
-      </div>
+          <rect x="20" y="130" width="156" height="120" rx="12" class="box"/>
+          <text x="98" y="172" text-anchor="middle" class="t">LaunchDarkly</text>
+          <text x="98" y="194" text-anchor="middle" class="s">assignment: targeting</text>
+          <text x="98" y="211" text-anchor="middle" class="s">rules, flag evaluations</text>
 
-      <div class="prose">
-        <p>Worked example at our scale: detecting a 1.0&thinsp;pp lift on a 5.5% baseline first-bill rate, at 95% confidence and 80% power ((1.96 + 0.84)&sup2; &asymp; 7.84), needs &asymp; 8,800 orgs per arm — two to three weeks of trial volume on the funnel above. That calculator lived next to the experiment registry, and it is why the program ran <em>fixed-horizon</em> tests: no peeking at the p-value every morning and stopping on the first lucky day, no calling winners on underpowered segments.</p>
-      </div>
+          <rect x="216" y="50" width="156" height="120" rx="12" class="box"/>
+          <text x="294" y="92" text-anchor="middle" class="t">Segment</text>
+          <text x="294" y="114" text-anchor="middle" class="s">event routing:</text>
+          <text x="294" y="131" text-anchor="middle" class="s">exposures + product events</text>
 
-      <div class="callout" style="max-width:720px">
-        <strong>Statistical vs. practical significance.</strong> A significant 0.2&thinsp;pp lift can still be a &ldquo;no ship.&rdquo; Every concluded experiment was translated into dollars — lift &times; addressable volume — before rollout, which is where the impact estimates below come from.
+          <rect x="216" y="210" width="156" height="120" rx="12" class="box"/>
+          <text x="294" y="252" text-anchor="middle" class="t">Fivetran</text>
+          <text x="294" y="274" text-anchor="middle" class="s">managed sync: LaunchDarkly,</text>
+          <text x="294" y="291" text-anchor="middle" class="s">Mixpanel, Pendo</text>
+
+          <rect x="412" y="130" width="156" height="120" rx="12" class="box"/>
+          <text x="490" y="172" text-anchor="middle" class="t">Data lake</text>
+          <text x="490" y="194" text-anchor="middle" class="s">raw schemas on S3,</text>
+          <text x="490" y="211" text-anchor="middle" class="s">queried in Redshift</text>
+
+          <rect x="608" y="130" width="156" height="120" rx="12" class="box"/>
+          <text x="686" y="172" text-anchor="middle" class="t">dbt + Airflow</text>
+          <text x="686" y="194" text-anchor="middle" class="s">exposures, metrics,</text>
+          <text x="686" y="211" text-anchor="middle" class="s">experiment marts</text>
+
+          <rect x="804" y="130" width="156" height="120" rx="12" class="box"/>
+          <text x="882" y="172" text-anchor="middle" class="t">Tableau</text>
+          <text x="882" y="194" text-anchor="middle" class="s">templated experiment</text>
+          <text x="882" y="211" text-anchor="middle" class="s">readouts</text>
+
+          <line x1="176" y1="168" x2="212" y2="122" class="flow"/>
+          <text x="88" y="104" class="lbl">exposure events</text>
+          <line x1="176" y1="212" x2="212" y2="258" class="flow"/>
+          <text x="20" y="296" class="lbl">flag &amp; experiment metadata</text>
+          <line x1="372" y1="122" x2="408" y2="168" class="flow"/>
+          <line x1="372" y1="258" x2="408" y2="212" class="flow"/>
+          <line x1="568" y1="190" x2="604" y2="190" class="flow"/>
+          <line x1="764" y1="190" x2="800" y2="190" class="flow"/>
+        </svg>
+        <figcaption>The experiment data flow. Segment carries the behavioral stream; Fivetran carries the structured configs and tool exports; dbt models on the lake join them into one readout layer.</figcaption>
+      </figure>
+    </section>
+
+    <section aria-labelledby="platform" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">The platform</p><h2 id="platform">Three layers, one contract</h2></div></div>
+      <div class="prose"><p>The build sits on the diagram above as three layers. Together they guarantee one thing: every experiment is measured from the same tables, by the same definitions, on the same schedule.</p></div>
+
+      <div style="max-width:720px">
+        <div class="stage"><div class="n">1</div><div><h3>Ingestion</h3><p>Airflow-scheduled loads land both paths in the lake: Segment events and Fivetran-synced configs. Identity stitching links anonymous visitor to admin user to customer account, so an exposure on the marketing site and a bill paid in the product resolve to the same customer. Raw flag evaluations become deduplicated assignment tables, one row per customer per experiment, attributed to first exposure, with sample-ratio-mismatch checks on every refresh to catch broken randomization early.</p></div></div>
+        <div class="stage"><div class="n">2</div><div><h3>Metrics</h3><p>Activation, conversion, verification, and segment definitions (including ICP, ideal customer profile: the customers the product is built and priced for) are modeled once as dbt marts. Experiment readout models join the same exposure tables to the same metric tables for every test, and compute the statistics in the model rather than in ad hoc queries. Two analysts asking the same question get the same number.</p></div></div>
+        <div class="stage"><div class="n">3</div><div><h3>Reporting</h3><p>A templated Tableau framework: registering an experiment's metadata produces a complete dashboard with arms, lift, confidence intervals, segment cuts, and guardrails. No per-experiment workbook building; readout setup went from days to hours.</p></div></div>
       </div>
     </section>
 
-    <section aria-labelledby="stack" style="margin-top:44px">
-      <div class="sec-head"><div><p class="eyebrow">What I built</p><h2 id="stack">The measurement machinery</h2></div></div>
-      <div class="prose"><p>Experimentation ran on an in-house layer built on <strong>LaunchDarkly</strong> feature flags: targeting rules split eligible orgs into arms, and every flag evaluation was logged as an exposure event. My work started where the flags ended — getting from raw evaluations to trustworthy readouts.</p></div>
+    <section aria-labelledby="ab" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Method</p><h2 id="ab">How an A/B test works</h2></div></div>
+      <div class="prose"><p>An A/B test is a randomized controlled experiment. Every experiment in this program followed the same six steps.</p></div>
 
       <div style="max-width:720px">
-        <div class="stage"><div class="n">1</div><div><h3>Assignment &amp; exposure pipelines</h3><p style="margin:6px 0 0;color:var(--secondary)">Flag evaluations landed in the warehouse as deduplicated, first-exposure-attributed assignment tables — one row per org per experiment, immune to re-evaluation noise and reassignment bugs. Sample-ratio-mismatch checks ran on every refresh.</p></div></div>
-        <div class="stage"><div class="n">2</div><div><h3>Behavioral event ingestion</h3><p style="margin:6px 0 0;color:var(--secondary)">Mixpanel product events and Pendo guide interactions ingested to Redshift on Airflow schedules, with identity stitching from anonymous visitor to admin to organization — so funnels meant the same thing in every tool.</p></div></div>
-        <div class="stage"><div class="n">3</div><div><h3>A governed metrics layer</h3><p style="margin:6px 0 0;color:var(--secondary)">Activation, conversion, verification, and segment definitions (ICP, plan tier) modeled once as warehouse marts — every experiment readout joined the same exposure tables to the same metric tables. No per-experiment SQL forks, no &ldquo;my activation number differs from yours.&rdquo;</p></div></div>
-        <div class="stage"><div class="n">4</div><div><h3>Templated Tableau readouts</h3><p style="margin:6px 0 0;color:var(--secondary)">A reporting framework where a new experiment got a full dashboard — arms, lift, confidence intervals, segment cuts, guardrails — by registering metadata, not by building a workbook. Readout setup went from days to hours.</p></div></div>
-        <div class="stage"><div class="n">5</div><div><h3>The experiment registry</h3><p style="margin:6px 0 0;color:var(--secondary)">A running catalog of every major experiment: hypothesis, design, sample-size commitment, owner, status, and concluded result — the institutional memory that let wins compound instead of being re-litigated.</p></div></div>
+        <div class="stage"><div class="n">1</div><div><h3>Write the hypothesis first</h3><p>A written statement before launch: the change, the primary metric it should move, guardrail metrics that must not degrade, and the segments to read (ICP versus all customers).</p></div></div>
+
+        <div class="stage"><div class="n">2</div><div><h3>Commit to a sample size</h3><p>Start from the MDE (minimum detectable effect: the smallest lift worth acting on) and compute the customers needed per arm at the chosen confidence and power:</p>
+          <div class="formula" aria-label="Sample size per arm">
+            <em>n</em> per arm &nbsp;=&nbsp;
+            <span class="frac"><span class="top">(<em>z</em><sub>1&minus;&alpha;/2</sub> + <em>z</em><sub>1&minus;&beta;</sub>)<sup>2</sup> &middot; [<em>p</em><sub>1</sub>(1&minus;<em>p</em><sub>1</sub>) + <em>p</em><sub>2</sub>(1&minus;<em>p</em><sub>2</sub>)]</span><span class="bot">(<em>p</em><sub>2</sub> &minus; <em>p</em><sub>1</sub>)<sup>2</sup></span></span>
+          </div>
+          <p>At this funnel's scale: detecting a 1.0&thinsp;pp lift on a 5.5% baseline first-bill rate, at 95% confidence and 80% power ((1.96 + 0.84)&sup2; &asymp; 7.84), needs about 8,800 customers per arm, roughly two to three weeks of trial volume.</p></div></div>
+
+        <div class="stage"><div class="n">3</div><div><h3>Randomize customers into arms</h3><p>Eligible customers are split randomly into control (current experience) and treatment (the change). Randomization is what makes the result causal: both groups see the same seasonality, marketing, and bugs, so a difference in outcomes is attributable to the change itself.</p></div></div>
+
+        <div class="stage"><div class="n">4</div><div><h3>Run to the committed horizon</h3><p>The test runs until the pre-committed sample size is reached. No stopping early because the p-value looks good on a given day; that practice inflates false positives. Guardrail metrics are monitored throughout.</p></div></div>
+
+        <div class="stage"><div class="n">5</div><div><h3>Read out with a z-test</h3><p>For conversion-style metrics the readout is a two-proportion z-test. With <em>p̂</em><sub>T</sub>, <em>p̂</em><sub>C</sub> the observed rates and <em>n</em><sub>T</sub>, <em>n</em><sub>C</sub> the group sizes:</p>
+          <div class="formula" aria-label="Two-proportion z-test statistic">
+            <em>z</em> &nbsp;=&nbsp;
+            <span class="frac"><span class="top"><em>p̂</em><sub>T</sub> &minus; <em>p̂</em><sub>C</sub></span><span class="bot">&#8730;<span class="rad"><em>p̄</em>(1&minus;<em>p̄</em>)&thinsp;(1/<em>n</em><sub>T</sub> + 1/<em>n</em><sub>C</sub>)</span></span></span>
+            &nbsp;,&nbsp;&nbsp; <em>p̄</em> = <span class="frac"><span class="top"><em>x</em><sub>T</sub> + <em>x</em><sub>C</sub></span><span class="bot"><em>n</em><sub>T</sub> + <em>n</em><sub>C</sub></span></span>
+          </div>
+          <p>Under the null hypothesis <em>H</em><sub>0</sub>: <em>p</em><sub>T</sub> = <em>p</em><sub>C</sub>, the statistic is approximately standard normal, so |<em>z</em>| &ge; 1.96 means the lift is significant at &alpha; = 0.05. Every reported lift carries its 95% confidence interval: (<em>p̂</em><sub>T</sub> &minus; <em>p̂</em><sub>C</sub>) &plusmn; 1.96&thinsp;&middot;&thinsp;SE.</p></div></div>
+
+        <div class="stage"><div class="n">6</div><div><h3>Convert to dollars, then decide</h3><p>Statistical significance is not a ship decision. Each concluded experiment was converted to estimated annual impact (lift &times; addressable volume) before rollout. A statistically significant 0.2&thinsp;pp lift can still be a no-ship.</p></div></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="lifecycle" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Operating model</p><h2 id="lifecycle">How an experiment ran, design to rollout</h2></div></div>
+      <div class="prose"><p>The statistics above are the contract; this is the process that enforced it across teams.</p></div>
+
+      <div style="max-width:720px">
+        <div class="stage"><div class="n">1</div><div><h3>Design review</h3><p>The owner filed the hypothesis; Analytics and Data Science signed off on the primary metric, guardrails, segment definitions, and the sample-size commitment before any code was written.</p></div></div>
+        <div class="stage"><div class="n">2</div><div><h3>Instrumentation</h3><p>The feature flag and targeting rules were created in LaunchDarkly; exposure events were wired through Segment and validated in staging. The rule: events land correctly in the lake before launch, not after.</p></div></div>
+        <div class="stage"><div class="n">3</div><div><h3>Ramped launch</h3><p>Traffic ramped from a small canary to the full 50/50 split. The sample-ratio-mismatch check ran from day one; the flag itself was the kill switch.</p></div></div>
+        <div class="stage"><div class="n">4</div><div><h3>Monitoring</h3><p>The templated Tableau readout refreshed daily with guardrails alongside the primary metric. A weekly checkpoint with the Growth team reviewed health, not results; results stayed sealed until the horizon.</p></div></div>
+        <div class="stage"><div class="n">5</div><div><h3>Readout and decision</h3><p>At the committed horizon: z-test, confidence intervals, segment cuts, and the dollarized impact estimate, presented at the program review for a ship or no-ship call.</p></div></div>
+        <div class="stage"><div class="n">6</div><div><h3>Rollout</h3><p>A win went to 100% of its segment through the same flag, the losing code path was removed, and the result was logged. The rolled-out experience became the new control for the next test, so wins compounded without double-counting lift.</p></div></div>
       </div>
 
       <figure class="figure">
-        <img src="../assets/img/onboarding-experiments/experiment-registry.png" loading="lazy" width="1600" height="900" alt="Experiment registry view: five active experiments with segment, status, owner, and next milestone columns" />
-        <figcaption>The registry view of the active pipeline — segments, statuses, owners, milestones (names illustrative).</figcaption>
+        <div class="panel">
+        <svg viewBox="0 0 940 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Line chart of cumulative concluded wins versus completed rollouts across seven months, ending at 13 wins and 10 rollouts">
+          <g font-size="13">
+            <line x1="90" y1="30" x2="122" y2="30" stroke="#B4441E" stroke-width="2.5"/>
+            <text x="130" y="35" class="c-lab">Concluded wins</text>
+            <line x1="290" y1="30" x2="322" y2="30" stroke="#57524A" stroke-width="2" stroke-dasharray="6 5"/>
+            <text x="330" y="35" class="c-lab">Rollouts</text>
+          </g>
+          <g>
+            <line x1="80" y1="330" x2="900" y2="330" stroke="#E7E1D5"/>
+            <line x1="80" y1="290" x2="900" y2="290" stroke="#F0EBE0"/>
+            <line x1="80" y1="250" x2="900" y2="250" stroke="#F0EBE0"/>
+            <line x1="80" y1="210" x2="900" y2="210" stroke="#F0EBE0"/>
+            <line x1="80" y1="170" x2="900" y2="170" stroke="#F0EBE0"/>
+            <line x1="80" y1="130" x2="900" y2="130" stroke="#F0EBE0"/>
+            <line x1="80" y1="90" x2="900" y2="90" stroke="#F0EBE0"/>
+            <line x1="80" y1="50" x2="900" y2="50" stroke="#F0EBE0"/>
+            <text x="66" y="335" text-anchor="end" class="c-mut" font-size="12">0</text>
+            <text x="66" y="295" text-anchor="end" class="c-mut" font-size="12">2</text>
+            <text x="66" y="255" text-anchor="end" class="c-mut" font-size="12">4</text>
+            <text x="66" y="215" text-anchor="end" class="c-mut" font-size="12">6</text>
+            <text x="66" y="175" text-anchor="end" class="c-mut" font-size="12">8</text>
+            <text x="66" y="135" text-anchor="end" class="c-mut" font-size="12">10</text>
+            <text x="66" y="95" text-anchor="end" class="c-mut" font-size="12">12</text>
+            <text x="66" y="55" text-anchor="end" class="c-mut" font-size="12">14</text>
+          </g>
+          <g class="c-mut" font-size="13" text-anchor="middle">
+            <text x="80" y="360">Jan</text><text x="217" y="360">Feb</text><text x="354" y="360">Mar</text><text x="490" y="360">Apr</text><text x="627" y="360">May</text><text x="763" y="360">Jun</text><text x="900" y="360">Jul</text>
+          </g>
+          <polyline points="80,310 217,290 354,270 490,250 627,210 763,170 900,130" fill="none" stroke="#57524A" stroke-width="2" stroke-dasharray="6 5"/>
+          <polyline points="80,330 217,310 354,290 490,250 627,190 763,130 900,70" fill="none" stroke="#B4441E" stroke-width="2.5"/>
+          <g fill="#57524A">
+            <circle cx="80" cy="310" r="4"/><circle cx="217" cy="290" r="4"/><circle cx="354" cy="270" r="4"/><circle cx="490" cy="250" r="4"/><circle cx="627" cy="210" r="4"/><circle cx="763" cy="170" r="4"/><circle cx="900" cy="130" r="4"/>
+          </g>
+          <g fill="#B4441E">
+            <circle cx="80" cy="330" r="4.5"/><circle cx="217" cy="310" r="4.5"/><circle cx="354" cy="290" r="4.5"/><circle cx="490" cy="250" r="4.5"/><circle cx="627" cy="190" r="4.5"/><circle cx="763" cy="130" r="4.5"/><circle cx="900" cy="70" r="4.5"/>
+          </g>
+          <g class="c-num" font-size="14">
+            <text x="627" y="172">7</text><text x="763" y="112">10</text><text x="893" y="52">13</text>
+          </g>
+          <g class="c-lab" font-size="13">
+            <text x="627" y="234">6</text><text x="763" y="194">8</text><text x="893" y="156">10</text>
+          </g>
+        </svg>
+        </div>
+        <figcaption>Cumulative concluded wins versus completed rollouts over a representative seven-month window.</figcaption>
       </figure>
     </section>
 
     <section aria-labelledby="experiments" style="margin-top:44px">
-      <div class="sec-head"><div><p class="eyebrow">Representative experiments</p><h2 id="experiments">Four tests that paid for the program</h2></div></div>
+      <div class="sec-head"><div><p class="eyebrow">Results</p><h2 id="experiments">Representative experiments</h2></div></div>
 
       <div class="prose">
         <h3>Prompt to pay a first bill <span class="status">CONCLUDED &middot; WON</span></h3>
-        <p>Roughly one in eighteen new AP orgs paid a vendor in their first 30 days — despite that action being the single strongest predictor of conversion and retention. The hypothesis: after a key setup action (add a vendor, create a bill, add a payment method), explicitly prompt the admin with a &ldquo;pay your first bill&rdquo; task.</p>
+        <p>Roughly one in eighteen new AP customers paid a vendor in their first 30 days, even though that action is the strongest predictor of conversion and retention. The test: after a key setup action (adding a vendor, creating a bill, adding a payment method), prompt the admin with an explicit &ldquo;pay your first bill&rdquo; task.</p>
         <ul class="exp-results">
           <li><strong>+92%</strong> 7-day activation and <strong>+21%</strong> 30-day activation in the ICP segment</li>
           <li>&asymp; <strong>$5.6M</strong> estimated annual impact; rolled into the successor onboarding flow</li>
         </ul>
 
-        <h3>Manual bank-verification reminder emails <span class="status">CONCLUDED &middot; WON</span></h3>
-        <p>Manual (micro-deposit) bank verification is where trials stall: verifications expire before anyone confirms the amounts. The test re-timed and rewrote the reminder sequence.</p>
-        <ul class="exp-results">
-          <li><strong>+6%</strong> successful manual bank adds; <strong>&minus;23%</strong> expired verifications; <strong>+9%</strong> banks verified</li>
-          <li><strong>+5%</strong> activation, <strong>+8%</strong> paid conversion &mdash; &asymp; <strong>$21.6M</strong> annual TPV (total payment volume) unlocked</li>
-        </ul>
-
         <h3>Payments-network discovery <span class="status">CONCLUDED &middot; WON</span></h3>
-        <p>For entry-tier (Essentials) orgs, onboarding added education and discovery of the platform&rsquo;s payments network — finding vendors already on the network means the first payment needs no vendor setup at all.</p>
+        <p>For entry-tier (Essentials) customers, onboarding added education about the platform&rsquo;s payments network. Paying a vendor who is already on the network requires no vendor setup, so discovery shortens the path to a first payment.</p>
         <ul class="exp-results">
-          <li><strong>+12%</strong> activation and <strong>+17%</strong> paid conversion for Essentials orgs</li>
-          <li>&asymp; <strong>$4.1M</strong> projected annual incremental LTV (lifetime value); rolled out to 100% of the segment</li>
+          <li><strong>+12%</strong> activation and <strong>+17%</strong> paid conversion for Essentials customers</li>
+          <li>&asymp; <strong>$4.1M</strong> projected annual incremental LTV (customer lifetime value); rolled out to 100% of the segment</li>
         </ul>
 
-        <h3>Spend &amp; expense in advanced onboarding <span class="status">CONCLUDED &middot; WON</span></h3>
-        <p>Advanced-trial orgs that signaled interest in the company&rsquo;s spend &amp; expense product (S&amp;E — corporate cards plus expense management) got an enhanced onboarding flow that carried the application forward instead of parking it.</p>
+        <h3>Credit line application in advanced onboarding <span class="status">CONCLUDED &middot; WON</span></h3>
+        <p>Advanced-trial customers who signaled interest in financing (a revolving credit line for paying bills) previously had their application parked after sign-up. The tested flow carried the credit line application forward as part of onboarding itself.</p>
         <ul class="exp-results">
-          <li><strong>+55%</strong> S&amp;E application starts, <strong>+52%</strong> submissions</li>
-          <li><strong>+15%</strong> 30-day activation, <strong>+6%</strong> paid conversion &mdash; &asymp; <strong>$2.9M</strong> estimated annual impact</li>
+          <li><strong>+55%</strong> credit line application starts and <strong>+52%</strong> submitted applications</li>
+          <li><strong>+15%</strong> 30-day activation and <strong>+6%</strong> paid conversion; &asymp; <strong>$2.9M</strong> estimated annual impact</li>
         </ul>
       </div>
-
-      <figure class="figure">
-        <img src="../assets/img/onboarding-experiments/impact-by-experiment.png" loading="lazy" width="1448" height="1086" alt="Bar chart of estimated annual impact by experiment: bank verification emails $21.6M, prompt to pay first bill $5.6M, network discovery $4.1M, spend and expense onboarding $2.9M" />
-        <figcaption>Estimated annual impact by experiment — lift &times; addressable volume, the number that decided rollouts.</figcaption>
-      </figure>
-    </section>
-
-    <section aria-labelledby="cadence" style="margin-top:44px">
-      <div class="sec-head"><div><p class="eyebrow">Operating model</p><h2 id="cadence">Wins compound when rollout is the default</h2></div></div>
-      <div class="prose">
-        <p>The program&rsquo;s rule was that a concluded win goes to 100% unless a guardrail objects — and the measurement stack is what made that safe. Because every experiment read from the same exposure tables and metric marts, a &ldquo;win&rdquo; meant the same thing in February as in July, and successive experiments could build on rolled-out predecessors without double-counting their lift.</p>
-      </div>
-      <figure class="figure">
-        <img src="../assets/img/onboarding-experiments/wins-rollouts-trend.png" loading="lazy" width="1448" height="1086" alt="Line chart of cumulative concluded wins versus rollouts across seven months, ending at 13 wins and 10 rollouts" />
-        <figcaption>Cumulative concluded wins vs. completed rollouts over a representative seven-month window.</figcaption>
-      </figure>
-      <figure class="figure">
-        <img src="../assets/img/onboarding-experiments/takeaways.png" loading="lazy" width="1448" height="1086" alt="Key takeaways card: first-bill prompting is the strongest activation driver; reminder optimization improves verification and conversion; network discovery works best for Essentials; S&E onboarding lifts advanced-trial conversion; scale wins while maintaining the test pipeline" />
-        <figcaption>Program takeaways as they appeared on the summary dashboard.</figcaption>
-      </figure>
     </section>
 
     <section aria-labelledby="aged" style="margin-top:44px">
-      <div class="sec-head"><div><p class="eyebrow">Honest postscript</p><h2 id="aged">What aged out</h2></div></div>
+      <div class="sec-head"><div><p class="eyebrow">Retrospective</p><h2 id="aged">What aged out</h2></div></div>
       <div class="prose">
-        <p>Flag-based assignment with hand-rolled exposure logging was the right 2022 answer; today I would reach for warehouse-native experimentation (GrowthBook, Eppo) sitting directly on a dbt metrics layer, and add CUPED variance reduction to shrink those two-to-three-week runtimes. The Google-Sheets-linked deep dives that supplemented dashboards are the part I&rsquo;d retire first — the analyses were sound, but anything that matters belongs in a governed mart, not a linked spreadsheet. Fixed-horizon testing served the program well; a sequential (always-valid) framework is the natural next step for a faster funnel.</p>
+        <p>Flag-based assignment with Fivetran-synced configs and Segment-routed exposures was the right answer in 2022. Today I would use warehouse-native experimentation (GrowthBook or Eppo) on a dbt metrics layer, and add CUPED variance reduction to shorten the two-to-three-week runtimes. The spreadsheet-linked deep dives that supplemented the dashboards would be the first thing to retire: the analyses were sound, but recurring analysis belongs in governed marts, not linked spreadsheets. Fixed-horizon testing served the program well; a sequential (always-valid) testing framework is the natural next step.</p>
       </div>
-    </section>
-
-    <section aria-labelledby="glossary" style="margin-top:44px">
-      <div class="sec-head"><div><p class="eyebrow">Glossary</p><h2 id="glossary">Terms used above</h2></div></div>
-      <table class="results" style="max-width:720px">
-        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
-        <tbody>
-          <tr><td>AP</td><td>Accounts payable — the bills a business owes its vendors.</td></tr>
-          <tr><td>AR</td><td>Accounts receivable — the invoices a business is owed by its customers.</td></tr>
-          <tr><td>Activation</td><td>An org completing its first core money movement (e.g., first bill paid) within 7 or 30 days.</td></tr>
-          <tr><td>Conversion</td><td>A trial org becoming a paying subscriber.</td></tr>
-          <tr><td>ICP</td><td>Ideal customer profile — the segment the product is built and priced for.</td></tr>
-          <tr><td>TPV</td><td>Total payment volume — dollars moved through the platform.</td></tr>
-          <tr><td>LTV</td><td>Customer lifetime value — projected total margin from a customer relationship.</td></tr>
-          <tr><td>S&amp;E</td><td>Spend &amp; expense — the corporate card and expense-management product line.</td></tr>
-          <tr><td>MDE</td><td>Minimum detectable effect — the smallest lift an experiment is powered to detect.</td></tr>
-        </tbody>
-      </table>
-      <p class="fine" style="color:var(--muted);font-size:0.85rem;max-width:720px;margin-top:18px">Employer anonymized; internal platform names omitted. All metrics are directionally accurate but deliberately adjusted, and dashboards are reconstructions — no confidential performance data appears on this page.</p>
     </section>
 
     <a class="backlink" href="../projects.html">&larr; All projects</a>

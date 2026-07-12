@@ -1,0 +1,17 @@
+<svg viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A/B testing for customer onboarding">
+  <rect width="400" height="250" fill="#F6F1E9"/>
+  <!-- funnel, left -->
+  <rect x="36" y="52" width="130" height="24" rx="5" fill="#D8CDBA"/>
+  <rect x="36" y="88" width="96" height="24" rx="5" fill="#D8CDBA" opacity="0.75"/>
+  <rect x="36" y="124" width="64" height="24" rx="5" fill="#D8CDBA" opacity="0.55"/>
+  <rect x="36" y="160" width="34" height="24" rx="5" fill="#B4441E"/>
+  <!-- divider -->
+  <line x1="204" y1="40" x2="204" y2="210" stroke="#D8CDBA" stroke-width="2" stroke-dasharray="7 7"/>
+  <!-- A/B readout, right -->
+  <text x="236" y="66" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="15" fill="#8A7B63">A</text>
+  <polyline points="232,150 268,146 304,148 340,142" fill="none" stroke="#8A7B63" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="340" cy="142" r="5" fill="#8A7B63"/>
+  <text x="356" y="98" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="15" fill="#B4441E">B</text>
+  <polyline points="232,182 268,164 304,128 340,92" fill="none" stroke="#B4441E" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="340" cy="92" r="5.5" fill="#B4441E"/>
+</svg>
