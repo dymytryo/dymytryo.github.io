@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Data platform observability — Dmytro Valiaiev</title>
-  <meta name="description" content="Case study: runtime data observability for a solar analytics warehouse — freshness SLAs from dbt sources, control-count reconciliation, catalog coverage, transition-based alerting, and four scorecards." />
+  <meta name="description" content="Case study: taking a solar analytics warehouse of 1,000+ dbt models from no observability to full coverage through freshness thresholds, count reconciliation, catalog coverage, transition-based alerting, and four live scorecards." />
   <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -22,16 +22,14 @@
     table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
     table.results td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
     table.results td:first-child { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; color: var(--accent-ink); }
-    .report-frame-wrap { border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; background: var(--surface); margin-top: 22px; box-shadow: 0 1px 4px rgba(26,23,18,0.06); }
-    .report-frame-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--rule); background: var(--surface-2); flex-wrap: wrap; }
+    .banner { margin: 26px 0 4px; }
+    .banner svg { width: 100%; height: auto; display: block; }
+    .report-frame-wrap { border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; background: var(--surface); margin: 18px 0 30px; box-shadow: 0 1px 4px rgba(26,23,18,0.06); }
+    .report-frame-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--rule); background: var(--surface-2); }
     .report-frame-bar .lab { font-family: var(--font-mono); font-size: 0.78rem; color: var(--secondary); }
     .report-frame-bar a { font-size: 0.82rem; border: 1px solid var(--rule-2); border-radius: 999px; padding: 5px 12px; color: var(--ink); white-space: nowrap; }
     .report-frame-bar a:hover { border-color: var(--accent); color: var(--accent-ink); }
-    .sc-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-    .sc-tabs button { font-family: var(--font-mono); font-size: 0.78rem; border: 1px solid var(--rule-2); border-radius: 999px; padding: 5px 14px; background: transparent; color: var(--secondary); cursor: pointer; }
-    .sc-tabs button:hover { border-color: var(--accent); color: var(--accent-ink); }
-    .sc-tabs button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-    #scorecardFrame { width: 100%; height: 720px; border: 0; display: block; background: #fff; }
+    .scframe { width: 100%; height: 680px; border: 0; display: block; background: #fff; }
   </style>
 </head>
 <body>
@@ -53,28 +51,176 @@
     <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
       <p class="eyebrow">Case study &middot; Framework</p>
       <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Data platform observability</h1>
-      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">Runtime observability for a solar company&rsquo;s analytics warehouse (Sunrun-scale: CRM, fleet telemetry, billing, field service, reference feeds landing in Snowflake for dbt). Four measurements answer the questions consumers actually ask &mdash; is it on time, is it all there, does it mean what it says &mdash; graded daily, published as four scorecards, with alerting tuned to page the right owner exactly once.</p>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">A solar analytics warehouse runs over 1,000 dbt models, fed by customer relationship management (CRM), billing, field service, reference feeds, and multiple Internet of Things (IoT) telemetry ingestions from the installed solar fleet. Before this work there was no observability layer: consumers discovered late loads and broken joins before engineers did. This framework took the platform to full coverage: four measurements graded daily, four scorecards, and alerting that pages the right owner exactly once.</p>
 
       <div class="metrics">
-        <div class="metric"><div class="num">4</div><div class="label">scorecards &mdash; one per audience</div></div>
-        <div class="metric"><div class="num">18</div><div class="label">sources under freshness SLAs</div></div>
-        <div class="metric"><div class="num">101</div><div class="label">checks graded daily</div></div>
-        <div class="metric"><div class="num">17</div><div class="label">alerts in 30 days &mdash; transitions, not states</div></div>
+        <div class="metric"><div class="num">1,000+</div><div class="label">dbt models brought under observability</div></div>
+        <div class="metric"><div class="num">none &rarr; full</div><div class="label">observability coverage, one quarter</div></div>
+        <div class="metric"><div class="num">IoT</div><div class="label">multiple telemetry ingestions with freshness thresholds</div></div>
+        <div class="metric"><div class="num">4</div><div class="label">scorecards: one per audience</div></div>
       </div>
+
+      <figure class="banner" role="img" aria-label="Flow from sources through the warehouse and daily checks to scorecards and alerts">
+        <svg viewBox="0 0 1000 210" xmlns="http://www.w3.org/2000/svg">
+          <!-- sources -->
+          <g fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5">
+            <rect x="22" y="34" width="118" height="26" rx="13"/>
+            <rect x="22" y="68" width="118" height="26" rx="13"/>
+            <rect x="22" y="102" width="118" height="26" rx="13"/>
+            <rect x="22" y="136" width="118" height="26" rx="13"/>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63">
+            <text x="40" y="51">CRM</text>
+            <text x="40" y="85">BILLING</text>
+            <text x="40" y="119">FIELD OPS</text>
+            <text x="40" y="153">IOT FLEET</text>
+          </g>
+          <!-- IoT signal arcs on the fleet chip -->
+          <g fill="none" stroke="#B4441E" stroke-width="1.8" stroke-linecap="round">
+            <path d="M124 149 a7 7 0 0 0 0 -10"/>
+            <path d="M128 153 a13 13 0 0 0 0 -18"/>
+          </g>
+          <!-- arrows sources -> warehouse -->
+          <g fill="none" stroke="#8A7B63" stroke-width="1.8">
+            <path d="M148 47 C 190 47 200 80 236 92"/>
+            <path d="M148 81 C 186 81 196 92 236 99"/>
+            <path d="M148 115 C 186 115 196 108 236 104"/>
+            <path d="M148 149 C 190 149 200 122 236 110"/>
+          </g>
+          <!-- warehouse cylinder -->
+          <g fill="#FFFFFF" stroke="#8A7B63" stroke-width="1.5">
+            <ellipse cx="292" cy="62" rx="52" ry="13"/>
+            <path d="M240 62 v86 a52 13 0 0 0 104 0 v-86" fill="#FFFFFF"/>
+          </g>
+          <g stroke="#8A7B63" stroke-width="1.5" fill="none">
+            <path d="M240 91 a52 13 0 0 0 104 0"/>
+            <path d="M240 120 a52 13 0 0 0 104 0"/>
+          </g>
+          <text x="292" y="187" font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63" text-anchor="middle">1,000+ dbt models</text>
+          <!-- arrow warehouse -> checks -->
+          <g fill="none" stroke="#B4441E" stroke-width="2.5">
+            <path d="M352 105 C 390 105 398 105 428 105"/>
+          </g>
+          <path d="M428 99 L 440 105 L 428 111 Z" fill="#B4441E"/>
+          <!-- daily checks rail -->
+          <g fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5">
+            <rect x="452" y="52" width="204" height="106" rx="10"/>
+          </g>
+          <text x="554" y="42" font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63" text-anchor="middle">CHECKS &middot; DAILY 07:00</text>
+          <g font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63">
+            <text x="472" y="78">freshness</text>
+            <text x="472" y="102">counts</text>
+            <text x="472" y="126">metadata</text>
+            <text x="472" y="150">consistency</text>
+          </g>
+          <!-- pass dots and one alert -->
+          <g>
+            <circle cx="620" cy="74" r="6" fill="#FFFFFF" stroke="#8A7B63" stroke-width="1.5"/>
+            <path d="M617 74 l2.4 2.6 L 624 71" fill="none" stroke="#8A7B63" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="620" cy="98" r="6" fill="#B4441E"/>
+            <circle cx="620" cy="122" r="6" fill="#FFFFFF" stroke="#8A7B63" stroke-width="1.5"/>
+            <path d="M617 122 l2.4 2.6 L 624 119" fill="none" stroke="#8A7B63" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="620" cy="146" r="6" fill="#F3D9CC" stroke="#8A7B63" stroke-width="1.5"/>
+          </g>
+          <!-- arrows checks -> outputs -->
+          <g fill="none" stroke="#B4441E" stroke-width="2.5">
+            <path d="M668 84 C 700 78 706 70 734 66"/>
+            <path d="M668 126 C 700 132 706 140 734 144"/>
+          </g>
+          <path d="M733 60 L 745 66 L 734 72 Z" fill="#B4441E"/>
+          <path d="M734 138 L 745 144 L 733 150 Z" fill="#B4441E"/>
+          <!-- scorecard mini-card -->
+          <g fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5">
+            <rect x="756" y="26" width="120" height="80" rx="8"/>
+          </g>
+          <line x1="756" y1="44" x2="876" y2="44" stroke="#D8CDBA" stroke-width="1.5"/>
+          <g fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.2">
+            <rect x="765" y="52" width="48" height="20" rx="4"/>
+            <rect x="820" y="52" width="48" height="20" rx="4"/>
+            <rect x="765" y="78" width="48" height="20" rx="4"/>
+          </g>
+          <rect x="820" y="78" width="48" height="20" rx="4" fill="#F3D9CC" stroke="#B4441E" stroke-width="1.2"/>
+          <text x="888" y="70" font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63">&times;4</text>
+          <text x="816" y="124" font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63" text-anchor="middle">scorecards</text>
+          <!-- bell -->
+          <g fill="#B4441E">
+            <path d="M816 140 c-8 0 -10 7 -10 13 v6 l-4 6 h28 l-4 -6 v-6 c0 -6 -2 -13 -10 -13 z"/>
+            <circle cx="816" cy="168" r="3"/>
+          </g>
+          <g fill="none" stroke="#B4441E" stroke-width="1.8" stroke-linecap="round">
+            <path d="M838 142 a18 18 0 0 1 5 12"/>
+            <path d="M794 142 a18 18 0 0 0 -5 12"/>
+          </g>
+          <text x="816" y="196" font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63" text-anchor="middle">pages once</text>
+        </svg>
+      </figure>
     </section>
 
     <div class="prose">
-      <div class="tags" style="margin-top:16px">
+      <div class="tags" style="margin-top:8px">
         <span>dbt</span><span>Snowflake</span><span>DuckDB</span><span>data quality</span><span>alerting</span>
       </div>
     </div>
 
-    <section aria-labelledby="analysis" style="margin-top:44px">
-      <div class="sec-head"><div><p class="eyebrow">The framework</p><h2 id="analysis">The design, step by step</h2></div></div>
+    <section aria-labelledby="scorecards" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Live output</p><h2 id="scorecards">The four scorecards</h2></div></div>
 
       <div class="prose">
-        <h3>Step 1 &mdash; four measurements, one registry</h3>
-        <p>Every check lives in a YAML registry with a measurement, a SQL file, a target, a severity, and an owner. <strong>Availability</strong> (did data arrive on schedule), <strong>Completeness</strong> (does it carry its metadata context), <strong>Consistency</strong> (is representation uniform), <strong>Expectations</strong> (did the right number of records arrive). Adding a check is a YAML entry plus a SQL file &mdash; no runner changes.</p>
+        <p>One page per audience, and every number traces back to a graded check result; the scorecard layer never recomputes anything. The scorecards below are live pages produced by the repo&rsquo;s demo run (an anonymized, deterministic slice of the platform: 101 checks over 5 weeks of history), with week-over-week deltas, 28-day sparklines, and drill-downs.</p>
+        <h3>Tests: for the platform team</h3>
+        <p>What is failing right now, by measurement, with severity and owner; tracked metrics against their targets.</p>
+      </div>
+      <div class="report-frame-wrap">
+        <div class="report-frame-bar">
+          <span class="lab">tests.html &middot; generated by build_scorecards.py</span>
+          <a href="../assets/reports/observability/tests.html" target="_blank" rel="noopener">Open full screen &nearr;</a>
+        </div>
+        <iframe class="scframe" src="../assets/reports/observability/tests.html" loading="lazy" title="Tests scorecard: checks and metrics graded daily"></iframe>
+      </div>
+
+      <div class="prose">
+        <h3>Alerts: for on-call</h3>
+        <p>Open incidents with age, recent pages, routing by channel, noisiest checks, and median time to acknowledge.</p>
+      </div>
+      <div class="report-frame-wrap">
+        <div class="report-frame-bar">
+          <span class="lab">alerts.html &middot; generated by build_scorecards.py</span>
+          <a href="../assets/reports/observability/alerts.html" target="_blank" rel="noopener">Open full screen &nearr;</a>
+        </div>
+        <iframe class="scframe" src="../assets/reports/observability/alerts.html" loading="lazy" title="Alerts scorecard: incidents, routing, and noise"></iframe>
+      </div>
+
+      <div class="prose">
+        <h3>Tables: for governance</h3>
+        <p>Catalog size, monitoring reach, owner and metadata coverage by schema, and the gap list ranked for the next push.</p>
+      </div>
+      <div class="report-frame-wrap">
+        <div class="report-frame-bar">
+          <span class="lab">tables.html &middot; generated by build_scorecards.py</span>
+          <a href="../assets/reports/observability/tables.html" target="_blank" rel="noopener">Open full screen &nearr;</a>
+        </div>
+        <iframe class="scframe" src="../assets/reports/observability/tables.html" loading="lazy" title="Tables scorecard: catalog coverage and governance gaps"></iframe>
+      </div>
+
+      <div class="prose">
+        <h3>Users &middot; Stewards: for the operating model</h3>
+        <p>Active platform users, steward assignments and load, and monitored tables still missing a steward.</p>
+      </div>
+      <div class="report-frame-wrap">
+        <div class="report-frame-bar">
+          <span class="lab">users.html &middot; generated by build_scorecards.py</span>
+          <a href="../assets/reports/observability/users.html" target="_blank" rel="noopener">Open full screen &nearr;</a>
+        </div>
+        <iframe class="scframe" src="../assets/reports/observability/users.html" loading="lazy" title="Users and stewards scorecard: coverage of the operating model"></iframe>
+      </div>
+    </section>
+
+    <section aria-labelledby="analysis" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">The framework</p><h2 id="analysis">How it works, step by step</h2></div></div>
+
+      <div class="prose">
+        <h3>Step 1: four measurements, one registry</h3>
+        <p>Every check lives in a YAML registry with a measurement, a SQL file, a target, a severity, and an owner. <strong>Availability</strong> (did data arrive on schedule), <strong>Completeness</strong> (does it carry its metadata context), <strong>Consistency</strong> (is representation uniform), <strong>Expectations</strong> (did the right number of records arrive). Adding a check is a YAML entry plus a SQL file, with no runner changes.</p>
       </div>
 
       <details class="code">
@@ -102,8 +248,8 @@ expectations:
       </details>
 
       <div class="prose">
-        <h3>Step 2 &mdash; freshness is a contract, not a feeling</h3>
-        <p>The SLAs live where dbt already looks: <code>sources.yml</code>, with <code>warn_after</code> / <code>error_after</code> per source table &mdash; telemetry in hours, batch extracts in a day, reference feeds in a week. <code>dbt source freshness</code> grades the contract; results land as a queryable log and roll up to On Time, At Risk, Late.</p>
+        <h3>Step 2: freshness is a contract, not a feeling</h3>
+        <p>The service-level agreements (SLAs) live where dbt already looks: <code>sources.yml</code>, with <code>warn_after</code> / <code>error_after</code> per source table: telemetry in hours, batch extracts in a day, reference feeds in a week. <code>dbt source freshness</code> grades the contract; results land as a queryable log and roll up to On Time, At Risk, Late.</p>
       </div>
 
       <div class="cell-out">source_name      table_name          delivery_status   age     delay
@@ -114,9 +260,9 @@ billing          payments            On Time           23.5h   0
 ...                                  16 of 18 On Time</div>
 
       <div class="prose">
-        <p>The two-tier SLA earns its keep on slow feeds: the stale rates file above warned one day earlier at the 7-day mark, then paged at 8 days &mdash; escalation, not surprise.</p>
-        <h3>Step 3 &mdash; counts against expectations</h3>
-        <p>Every extract carries a control count (what the source says it sent). Reconciling it against what landed catches records lost or duplicated in transit; a z-score against the trailing 28 days catches what reconciliation cannot &mdash; the day the control count itself is wrong, or a whole segment stops emitting.</p>
+        <p>The two-tier SLA earns its keep on slow feeds: the stale rates file above warned one day earlier at the 7-day mark, then paged at 8 days, creating escalation instead of surprise.</p>
+        <h3>Step 3: counts against expectations</h3>
+        <p>Every extract carries a control count (what the source says it sent). Reconciling it against what landed catches records lost or duplicated in transit; a z-score against the trailing 28 days catches what reconciliation cannot, such as an incorrect control count or a whole segment that stops emitting.</p>
       </div>
 
       <details class="code">
@@ -143,10 +289,10 @@ INNER JOIN stats AS s USING (table_name)</pre>
       </details>
 
       <div class="prose">
-        <p>Signals correlate on purpose: when the production rollup missed its overnight batch, freshness warned that day &mdash; and the next day&rsquo;s catch-up double batch tripped the volume monitor. Two checks, one story, which is exactly the reading an on-call engineer needs.</p>
-        <h3>Step 4 &mdash; metadata coverage from daily catalog snapshots</h3>
-        <p>Completeness metrics (owner defined, tables and columns described, primary and foreign keys documented, naming conventions) grade a daily snapshot of the catalog rather than the live schema &mdash; the same trick that makes schema change detection possible in a warehouse without metadata time travel. The runner asserts live SQL and snapshot agree on the current day, so the two paths cannot drift silently. Targets ratchet: they sit just above current coverage and move up as the governance push lands, so the metric stays a goal, not an alarm.</p>
-        <h3>Step 5 &mdash; alert on transitions, not states</h3>
+        <p>Signals correlate on purpose: when the production rollup missed its overnight batch, freshness warned that day; the next day&rsquo;s catch-up double batch tripped the volume monitor. Two checks, one story, which is exactly the reading an on-call engineer needs.</p>
+        <h3>Step 4: metadata coverage from daily catalog snapshots</h3>
+        <p>Completeness metrics (owner defined, tables and columns described, primary and foreign keys documented, naming conventions) grade a daily snapshot of the catalog rather than the live schema. This makes schema change detection possible in a warehouse without metadata time travel. The runner asserts live SQL and snapshot agree on the current day, so the two paths cannot drift silently. Targets ratchet: they sit just above current coverage and move up as the governance push lands, so the metric stays a goal, not an alarm.</p>
+        <h3>Step 5: alert on transitions, not states</h3>
         <p>A check that starts failing fires once and stays open until it recovers. Everything else is noise control:</p>
       </div>
 
@@ -161,25 +307,7 @@ fires = (worst == "fail" and prev in ("pass", "warn")) or \
       </details>
 
       <div class="prose">
-        <p>Alerts group by source system (a telemetry outage is one incident, not three pages), warn-to-fail escalates and re-pages, severity picks the channel (PagerDuty for high, Slack otherwise), and recipients are the owning team&rsquo;s on-call plus the table&rsquo;s steward. Coverage metrics never page at all &mdash; they trend on scorecards. Result: a month with a real outage, a double load, and a stale feed produced 17 alerts, not 170.</p>
-        <h3>Step 6 &mdash; four scorecards, one per audience</h3>
-        <p><strong>Tests</strong> for the platform team (what is failing right now, by measurement, with owners), <strong>Alerts</strong> for on-call (open incidents, age, routing, noisiest checks), <strong>Tables</strong> for governance (coverage by schema, gaps ranked), <strong>Users &middot; Stewards</strong> for the operating model (who owns what, where stewardship is missing). Every number traces back to a graded check result &mdash; the scorecard layer never recomputes anything. The scorecards below are live: the actual HTML output of the repo&rsquo;s demo run, with week-over-week deltas, sparklines, and drill-downs.</p>
-      </div>
-
-      <div class="report-frame-wrap">
-        <div class="report-frame-bar">
-          <div class="sc-tabs" role="tablist" aria-label="Scorecards">
-            <button class="on" data-sc="tests">Tests</button>
-            <button data-sc="alerts">Alerts</button>
-            <button data-sc="tables">Tables</button>
-            <button data-sc="users">Users &middot; Stewards</button>
-          </div>
-          <a id="scorecardOpen" href="../assets/reports/observability/tests.html" target="_blank" rel="noopener">Open full screen &nearr;</a>
-        </div>
-        <iframe id="scorecardFrame" src="../assets/reports/observability/tests.html" loading="lazy" title="Live observability scorecards: tests, alerts, tables, users"></iframe>
-      </div>
-
-      <div class="prose">
+        <p>Alerts group by source system (a telemetry outage is one incident, not three pages), warn-to-fail escalates and re-pages, severity picks the channel (PagerDuty for high, Slack otherwise), and recipients are the owning team&rsquo;s on-call plus the table&rsquo;s steward. Coverage metrics never page; they trend on scorecards. Result: a month with a real outage, a double load, and a stale feed produced 17 alerts, not 170.</p>
         <h3>What a month looks like</h3>
         <p>The repo ships with a deterministic demo warehouse (50 tables, 5 weeks of history) whose incidents were designed to exercise every check class:</p>
       </div>
@@ -187,17 +315,17 @@ fires = (worst == "fail" and prev in ("pass", "warn")) or \
       <table class="results">
         <thead><tr><th>Date</th><th>Incident</th><th>Caught by</th></tr></thead>
         <tbody>
-          <tr><td>06-25</td><td>work-order extract loses 3% of rows in transit</td><td>Reconciliation &mdash; paged high, resolved next day</td></tr>
-          <tr><td>06-28 &ndash; 30</td><td>telemetry outage: three feeds late, volumes drop</td><td>Freshness + volume z-score &mdash; one grouped incident, escalated</td></tr>
-          <tr><td>07-02</td><td>battery model ships NUMBER(5,3) vs (5,1) upstream</td><td>Precision consistency &mdash; still open, 10 days</td></tr>
-          <tr><td>07-08</td><td>invoices double-load 40 duplicate rows</td><td>Reconciliation + key uniqueness &mdash; cleaned next day</td></tr>
+          <tr><td>06-25</td><td>work-order extract loses 3% of rows in transit</td><td>Reconciliation: paged high, resolved next day</td></tr>
+          <tr><td>06-28 &ndash; 30</td><td>telemetry outage: three feeds late, volumes drop</td><td>Freshness + volume z-score: one grouped incident, escalated</td></tr>
+          <tr><td>07-02</td><td>battery model ships NUMBER(5,3) vs (5,1) upstream</td><td>Precision consistency: still open, 10 days</td></tr>
+          <tr><td>07-08</td><td>invoices double-load 40 duplicate rows</td><td>Reconciliation + key uniqueness: cleaned next day</td></tr>
           <tr><td>07-11 &ndash; 12</td><td>missed batch, then catch-up spike; rates feed goes stale</td><td>Freshness warn &rarr; volume anomaly; warn &rarr; error escalation</td></tr>
         </tbody>
       </table>
 
       <div class="callout" style="max-width:720px">
         <p style="margin:0"><strong>Source &amp; data.</strong> The registry, the SQL for all four measurements, the runner with the alerting policy, the scorecards, and the deterministic mock warehouse (seeded, byte-identical on rerun) are on GitHub:
-        <a class="ulink" href="https://github.com/dymytryo/observability">observability</a>. The build-time counterpart &mdash; CI/CD controls that gate changes before they merge &mdash; is <a class="ulink" href="https://github.com/dymytryo/dataops-pipe">dataops-pipe</a>.</p>
+        <a class="ulink" href="https://github.com/dymytryo/observability">observability</a>. The build-time counterpart, continuous integration and continuous delivery (CI/CD) controls that gate changes before they merge, is <a class="ulink" href="https://github.com/dymytryo/dataops-pipe">dataops-pipe</a>.</p>
       </div>
 
     </section>
@@ -211,22 +339,5 @@ fires = (worst == "fail" and prev in ("pass", "warn")) or \
       <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
     </div>
   </footer>
-
-  <script>
-    (function () {
-      var frame = document.getElementById('scorecardFrame');
-      var open = document.getElementById('scorecardOpen');
-      var tabs = document.querySelectorAll('.sc-tabs button');
-      tabs.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          tabs.forEach(function (b) { b.classList.remove('on'); });
-          btn.classList.add('on');
-          var url = '../assets/reports/observability/' + btn.dataset.sc + '.html';
-          frame.src = url;
-          open.href = url;
-        });
-      });
-    })();
-  </script>
 </body>
 </html>
