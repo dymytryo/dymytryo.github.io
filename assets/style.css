@@ -194,6 +194,78 @@ section { margin: 64px 0; }
 }
 .impact-list .case-arrow:hover { border-color: var(--accent); color: var(--ink); }
 
+/* ---------- homepage experience ---------- */
+.experience-list {
+  list-style: none; padding: 0; margin: 20px 0 0;
+}
+.experience-item {
+  display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 32px;
+  padding: 30px 0; border-top: 1px solid var(--rule);
+}
+.experience-item:last-child { border-bottom: 1px solid var(--rule); }
+.experience-meta { display: flex; flex-direction: column; gap: 5px; padding-top: 3px; }
+.experience-date {
+  font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.4;
+  color: var(--accent-ink); white-space: nowrap;
+}
+.experience-lane {
+  font-family: var(--font-mono); font-size: 0.72rem; line-height: 1.4;
+  color: var(--secondary);
+}
+.experience-body h3 {
+  margin: 0; font-family: var(--font-display); font-size: 1.25rem;
+  font-weight: 550; line-height: 1.25; letter-spacing: -0.01em;
+}
+.experience-body h3 span { color: var(--secondary); font-weight: 400; }
+.experience-summary {
+  margin: 5px 0 14px; color: var(--secondary); font-size: 0.88rem; line-height: 1.45;
+}
+.experience-wins {
+  list-style: none; padding: 0; margin: 0; display: grid; gap: 11px;
+}
+.experience-wins li {
+  position: relative; padding-left: 19px; color: var(--secondary);
+  font-size: 0.94rem; line-height: 1.55;
+}
+.experience-wins li::before {
+  content: ""; position: absolute; left: 0; top: 0.66em;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+}
+.experience-wins strong { color: var(--ink); font-weight: 600; }
+.experience-wins a {
+  color: var(--accent-ink); font-weight: 500; white-space: nowrap;
+  border-bottom: 1px solid var(--accent); padding-bottom: 1px;
+}
+.experience-wins a:hover { color: var(--ink); }
+
+/* ---------- homepage toolkit ---------- */
+.toolkit-grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px; margin-top: 22px;
+}
+.toolkit-card {
+  padding: 20px; background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 12px;
+}
+.toolkit-title { display: flex; align-items: center; gap: 9px; }
+.toolkit-title > svg { flex: none; color: var(--accent); }
+.toolkit-title h3 {
+  margin: 0; font-family: var(--font-mono); font-size: 0.73rem;
+  line-height: 1.4; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--accent-ink);
+}
+.toolkit-card p {
+  margin: 12px 0 15px; color: var(--secondary); font-size: 0.86rem; line-height: 1.45;
+}
+.toolkit-tags {
+  list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px;
+}
+.toolkit-tags li {
+  padding: 4px 8px; border: 1px solid var(--rule); border-radius: 5px;
+  background: var(--surface-2); color: var(--ink); font-family: var(--font-mono);
+  font-size: 0.7rem; line-height: 1.35;
+}
+
 /* ---------- education / certs ---------- */
 .stack-list { list-style: none; padding: 0; margin: 16px 0 0; }
 .stack-list li { padding: 14px 0; border-top: 1px solid var(--rule); }
@@ -254,6 +326,12 @@ section { margin: 64px 0; }
   .metrics { gap: 22px 30px; }
   .slide-link { grid-template-columns: 1fr; align-items: start; }
   .slide-link-actions { justify-content: flex-start; }
+  .experience-item { grid-template-columns: 1fr; gap: 12px; padding: 24px 0; }
+  .experience-head { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .experience-head a { white-space: normal; }
+  .experience-meta { flex-direction: row; align-items: baseline; gap: 10px 16px; flex-wrap: wrap; }
+  .experience-lane { font-size: 0.7rem; }
+  .experience-wins li { font-size: 0.91rem; }
 }
 
 @media (max-width: 480px) {
@@ -335,6 +413,11 @@ section { margin: 64px 0; }
   .metric-cards { grid-template-columns: repeat(2, 1fr); }
   .cardgrid { grid-template-columns: 1fr; }
   .pipe { grid-template-columns: 1fr 1fr; }
+  .toolkit-grid { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 721px) and (max-width: 900px) {
+  .toolkit-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* icons */

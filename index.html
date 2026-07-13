@@ -174,60 +174,116 @@
       </div>
     </section>
 
-    <section aria-labelledby="skills">
-      <div class="sec-head"><div><p class="eyebrow">Toolkit</p><h2 id="skills">Skills &amp; stack</h2></div></div>
-      <div class="skills">
-        <div class="skill-group">
-          <h4><i class="si" data-lucide="boxes"></i>Modeling &amp; transformation</h4>
-          <div class="pills"><span class="pill">dbt</span><span class="pill">dimensional modeling</span><span class="pill">OBT</span><span class="pill">SCD / CDC</span><span class="pill">SQL</span></div>
-        </div>
-        <div class="skill-group">
-          <h4><i class="si" data-lucide="workflow"></i>Orchestration &amp; pipelines</h4>
-          <div class="pills"><span class="pill">Airflow / MWAA</span><span class="pill">AWS Glue</span><span class="pill">Spark</span><span class="pill">Python</span></div>
-        </div>
-        <div class="skill-group">
-          <h4><i class="si" data-lucide="database"></i>Warehouse &amp; lakehouse</h4>
-          <div class="pills"><span class="pill">Snowflake</span><span class="pill">Redshift</span><span class="pill">Trino / Starburst</span><span class="pill">Iceberg</span><span class="pill">Athena · S3</span></div>
-        </div>
-        <div class="skill-group">
-          <h4><i class="si" data-lucide="server-cog"></i>Platform &amp; DevOps</h4>
-          <div class="pills"><span class="pill">Kubernetes</span><span class="pill">Helm</span><span class="pill">Docker</span><span class="pill">Git / GitLab CI/CD</span></div>
-        </div>
-        <div class="skill-group">
-          <h4><i class="si" data-lucide="line-chart"></i>BI &amp; ML</h4>
-          <div class="pills"><span class="pill">Tableau</span><span class="pill">QuickSight</span><span class="pill">Jupyter</span><span class="pill">BERT</span><span class="pill">entity resolution</span></div>
-        </div>
-      </div>
-    </section>
-
     <section aria-labelledby="exp">
-      <div class="sec-head">
-        <div><p class="eyebrow">Experience</p><h2 id="exp">Where I&rsquo;ve worked</h2></div>
+      <div class="sec-head experience-head">
+        <div><p class="eyebrow">Experience</p><h2 id="exp">Where I&rsquo;ve built data platforms</h2></div>
         <a href="about.html">Full background &amp; education &rarr;</a>
       </div>
-      <div class="timeline">
-        <div class="role">
-          <div><span class="title">Staff Data Engineer / Data Architect</span> · <span class="org">BILL</span></div>
-          <div class="dates">2025 — Present</div>
-          <details class="role-details">
-            <summary>Key result</summary>
-            <ul class="impact-list">
-              <li>Led migration of 200+ TB enterprise data warehouse from <strong>Redshift</strong> to <strong>Trino</strong> using <strong>Apache Iceberg</strong>, reducing cost by 60%. <a class="case-arrow" href="case-studies/shift-left-lakehouse-migration.html" aria-label="Open Redshift to Trino and Iceberg migration case study">&rarr;</a></li>
+      <ol class="experience-list">
+        <li class="experience-item">
+          <div class="experience-meta">
+            <span class="experience-date">Jul 2025 &ndash; Present</span>
+            <span class="experience-lane">Platform architecture</span>
+          </div>
+          <div class="experience-body">
+            <h3>Staff Data Engineer / Data Architect <span>&middot; BILL</span></h3>
+            <p class="experience-summary">Lakehouse migration, platform economics, and governed delivery for enterprise data products.</p>
+            <ul class="experience-wins">
+              <li><strong>Lakehouse migration:</strong> Led a 200+ TB enterprise data warehouse migration from Redshift to Trino on Apache Iceberg, lowering infrastructure cost by 60%. <a href="case-studies/shift-left-lakehouse-migration.html" aria-label="Read the lakehouse migration case study">Read the case study &rarr;</a></li>
+              <li><strong>Platform rework:</strong> Replatformed 2,000+ Helm-orchestrated Snowflake extract, load, and transform (ELT) workloads, saving about $27K per month.</li>
+              <li><strong>Delivery governance:</strong> Built GitLab continuous integration and continuous delivery (CI/CD) controls for 3K+ SQL queries, with automated schema, row-count, and metric reconciliation.</li>
             </ul>
-          </details>
-        </div>
-        <div class="role"><div><span class="title">Senior Data Warehouse Engineer</span> · <span class="org">BILL</span></div><div class="dates">2024 — 2025</div></div>
-        <div class="role">
-          <div><span class="title">Senior Business Intelligence Engineer</span> · <span class="org">BILL</span></div>
-          <div class="dates">2022 — 2024</div>
-          <details class="role-details">
-            <summary>Key result</summary>
-            <ul class="impact-list">
-              <li>Engineered the data pipelines, experimentation models, and Tableau reporting framework supporting 18+ A/B tests across the AP/AR onboarding funnel, enabling reliable control-versus-treatment measurement, faster rollout of winning experiments, and attribution of $24M+ in estimated annual business impact. <a class="case-arrow" href="case-studies/onboarding-experimentation-program.html" aria-label="Open A/B testing for customer onboarding case study">&rarr;</a></li>
+          </div>
+        </li>
+        <li class="experience-item">
+          <div class="experience-meta">
+            <span class="experience-date">May 2024 &ndash; Jul 2025</span>
+            <span class="experience-lane">Analytics engineering</span>
+          </div>
+          <div class="experience-body">
+            <h3>Senior Data Warehouse Engineer <span>&middot; BILL</span></h3>
+            <p class="experience-summary">Commercial analytics pipelines and production data models across growth and payments.</p>
+            <ul class="experience-wins">
+              <li><strong>Lead optimization:</strong> Built a pipeline that prioritized 1M+ Salesforce leads using card-network application programming interfaces (APIs), bidirectional encoder representations from transformers (BERT) invoice matching, and merchant clustering, lifting conversion by 30%. <a href="case-studies/lead-optimization-pipeline.html" aria-label="Read the lead optimization case study">Read the case study &rarr;</a></li>
+              <li><strong>Modeled delivery:</strong> Designed dbt star-schema and one big table (OBT) datasets on Redshift and Snowflake, supported by 10+ Airflow and AWS Glue jobs.</li>
             </ul>
-          </details>
-        </div>
-        <div class="role"><div><span class="title">Instructor, Computer Science &amp; Information Systems</span> · <span class="org">Houston City College · Lone Star College</span></div><div class="dates">2023 — Present</div></div>
+          </div>
+        </li>
+        <li class="experience-item">
+          <div class="experience-meta">
+            <span class="experience-date">Oct 2022 &ndash; May 2024</span>
+            <span class="experience-lane">Business intelligence</span>
+          </div>
+          <div class="experience-body">
+            <h3>Senior Business Intelligence Engineer <span>&middot; BILL</span></h3>
+            <p class="experience-summary">Experimentation, forecasting, and automated decision support for customer onboarding.</p>
+            <ul class="experience-wins">
+              <li><strong>Experimentation program:</strong> Built data pipelines, models, and Tableau reporting for 18+ accounts payable (AP) and accounts receivable (AR) onboarding tests, with $23.4M in estimated annual impact. <a href="case-studies/onboarding-experimentation-program.html" aria-label="Read the customer onboarding experimentation case study">Read the case study &rarr;</a></li>
+              <li><strong>Decision support:</strong> Automated financial reporting and deployed models for forecasting, pacing, and vendor-churn analysis.</li>
+            </ul>
+          </div>
+        </li>
+        <li class="experience-item">
+          <div class="experience-meta">
+            <span class="experience-date">Jan 2023 &ndash; Present</span>
+            <span class="experience-lane">College instruction</span>
+          </div>
+          <div class="experience-body">
+            <h3>Computer Science &amp; Information Systems Instructor</h3>
+            <p class="experience-summary">Houston City College (Jan 2025 &ndash; Present) and Lone Star College (Jan 2023 &ndash; Mar 2025).</p>
+            <ul class="experience-wins">
+              <li><strong>Applied teaching:</strong> Developed and taught Python programming, statistical modeling, and cloud computing courses to 200+ students.</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="skills">
+      <div class="sec-head"><div><p class="eyebrow">Toolkit</p><h2 id="skills">The stack I use to build them</h2></div></div>
+      <div class="toolkit-grid">
+        <article class="toolkit-card">
+          <div class="toolkit-title"><i data-lucide="boxes" aria-hidden="true"></i><h3>Modeling &amp; transformation</h3></div>
+          <p>Analytics foundations, including slowly changing dimensions (SCD) and change data capture (CDC), that stay understandable as teams grow.</p>
+          <ul class="toolkit-tags" aria-label="Modeling and transformation tools">
+            <li>SQL</li><li>dbt</li><li>Python</li><li>Dimensional modeling</li><li>OBT</li><li>SCD / CDC</li><li>Jinja</li><li>pandas</li>
+          </ul>
+        </article>
+        <article class="toolkit-card">
+          <div class="toolkit-title"><i data-lucide="workflow" aria-hidden="true"></i><h3>Orchestration &amp; cloud</h3></div>
+          <p>Scheduled and event-driven pipelines with Amazon Managed Workflows for Apache Airflow (MWAA) and related cloud services.</p>
+          <ul class="toolkit-tags" aria-label="Orchestration and cloud tools">
+            <li>Airflow / MWAA</li><li>AWS Glue</li><li>Elastic Container Service / Fargate</li><li>S3</li><li>Athena</li><li>CloudWatch</li><li>Secrets Manager</li>
+          </ul>
+        </article>
+        <article class="toolkit-card">
+          <div class="toolkit-title"><i data-lucide="database" aria-hidden="true"></i><h3>Warehouse &amp; lakehouse</h3></div>
+          <p>Open and managed analytical platforms, from warehouse to object storage.</p>
+          <ul class="toolkit-tags" aria-label="Warehouse and lakehouse tools">
+            <li>Snowflake</li><li>Redshift</li><li>Trino / Starburst</li><li>Apache Iceberg</li><li>Spark</li><li>DuckDB</li>
+          </ul>
+        </article>
+        <article class="toolkit-card">
+          <div class="toolkit-title"><i data-lucide="server-cog" aria-hidden="true"></i><h3>Platform &amp; delivery</h3></div>
+          <p>Repeatable runtimes, releases, and controls for production data systems.</p>
+          <ul class="toolkit-tags" aria-label="Platform and delivery tools">
+            <li>Kubernetes</li><li>Helm</li><li>Docker</li><li>Git</li><li>GitLab CI/CD</li><li>dbt artifacts</li><li>Automated validation</li>
+          </ul>
+        </article>
+        <article class="toolkit-card">
+          <div class="toolkit-title"><i data-lucide="line-chart" aria-hidden="true"></i><h3>Analytics &amp; applied machine learning</h3></div>
+          <p>Decision products that connect trusted data to measurable outcomes.</p>
+          <ul class="toolkit-tags" aria-label="Analytics and machine learning tools">
+            <li>Tableau</li><li>QuickSight</li><li>Jupyter</li><li>scikit-learn</li><li>BERT</li><li>Entity resolution</li><li>A/B testing</li>
+          </ul>
+        </article>
+        <article class="toolkit-card">
+          <div class="toolkit-title"><i data-lucide="shield-check" aria-hidden="true"></i><h3>Reliability &amp; governance</h3></div>
+          <p>Quality signals and operating controls that make data safe to use.</p>
+          <ul class="toolkit-tags" aria-label="Reliability and governance capabilities">
+            <li>Data quality</li><li>Observability</li><li>Metadata / lineage</li><li>Source freshness</li><li>Type 2 dimensions</li><li>Reconciliation</li>
+          </ul>
+        </article>
       </div>
     </section>
 
