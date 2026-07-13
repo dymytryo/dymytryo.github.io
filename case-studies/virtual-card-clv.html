@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Customer lifetime value for a check-to-virtual-card program: Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: pricing a check-to-virtual-card conversion program. Cohort retention and survival curves by segment and channel, CLV computed four ways, per-channel conversion spend ceilings, and an RFM regression for next-month revenue." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+  <style>
+    details.code { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); margin: 16px 0; overflow: hidden; }
+    details.code summary { font-family: var(--font-mono); font-size: 0.82rem; color: var(--secondary); padding: 12px 18px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
+    details.code summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+    details.code[open] summary::before { transform: rotate(90deg); }
+    details.code summary:hover { color: var(--ink); }
+    details.code pre { margin: 0; padding: 4px 18px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6; color: var(--ink); }
+    .cell-out { background: var(--surface-2); border-radius: 12px; padding: 16px 20px; margin: 16px 0; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink); }
+    table.results { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.9rem; }
+    table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
+    table.results td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    table.results td:first-child { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; color: var(--accent-ink); }
+    .shot { border: 1px solid var(--rule); border-radius: 12px; width: 100%; height: auto; margin: 16px 0; display: block; background: #fff; }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study &middot; Notebook</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Customer lifetime value for a check-to-virtual-card program</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">A payments program converts merchants from check and ACH (automated clearing house) onto a virtual card rail and earns interchange on every settled payment. The retention study answered whether the program works; this one prices it: how long a converted merchant stays on the rail, what a convert is worth, and the most each onboarding channel should spend converting one. The answer changed where outreach dollars go.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">19 mo</div><div class="label">median time a convert stays on the rail</div></div>
+        <div class="metric"><div class="num">41x</div><div class="label">CLV spread across segment &times; channel cells ($149 to $6,113)</div></div>
+        <div class="metric"><div class="num">0.6x</div><div class="label">CLV-to-cost of outreach-converting occasional merchants: underwater</div></div>
+        <div class="metric"><div class="num">17%</div><div class="label">next-month revenue model beats the naive benchmark, held-out RMSE</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Jupyter</span><span>Python &middot; pandas</span><span>customer lifetime value (CLV)</span><span>survival analysis</span><span>scikit-learn &middot; statsmodels</span>
+      </div>
+    </div>
+
+    <section aria-labelledby="analysis" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">The notebook</p><h2 id="analysis">The analysis, step by step</h2></div></div>
+
+      <div class="prose">
+        <h3>Step 1: how long do we keep them on the rail?</h3>
+        <p>Conversion-month cohorts, the retention matrix, and its heatmap set the base, but cohort curves alone punish young cohorts for being young. A product-limit (Kaplan-Meier) estimate handles the censoring and collapses thirty-six cohorts into one honest curve per segment and per onboarding channel. The reads: high_frequency merchants settle the most and leave the fastest (interchange cost compounds weekly), integrated converts barely leave at all, and the two 2024 outreach-campaign cohorts sit visibly below their neighbors in the heatmap.</p>
+      </div>
+
+      <details class="code">
+        <summary>product-limit survival in twelve lines: censoring handled, no library needed</summary>
+        <pre>def km_curve(dur, churned, horizon=37):
+    surv, out = 1.0, [1.0]
+    for t in range(1, horizon):
+        at_risk = (dur >= t).sum()          # reached month t enrolled
+        events = ((dur == t) & churned).sum()
+        if at_risk > 0:
+            surv *= 1 - events / at_risk
+        out.append(surv)
+    return np.array(out)
+
+# dur: months on the rail; censored merchants get the anchor date,
+# churned merchants get their reversion month</pre>
+      </details>
+
+      <img class="shot" src="../assets/img/virtual-card-clv/retention-curves.png" alt="Survival on the rail by segment and by onboarding channel, with medians" width="1079" height="359" />
+
+      <div class="cell-out">Blended: 58.0% of converts still on the rail after 12 months, 44.7% after 24; median rail tenure 19 months.
+12-month retention by channel: integrated 72.7% | organic 61.9% | outreach 48.1%</div>
+
+      <div class="prose">
+        <h3>Step 2: CLV four ways, disagreeing on purpose</h3>
+        <p>Four estimates of the same quantity, each hiding a different assumption. Historical sums what a merchant has actually delivered: a floor, blind to tenure. Basic and granular multiply an average month by an assumed 36-month lifespan: optimistic by construction, since the survival curve says half the converts are gone by month 19. The traditional formula replaces the assumed lifespan with observed loyalty, retention over churn, and is the one fit for spend decisions on a rail where reversion is effectively final. Two base choices matter more than the arithmetic: revenue per <em>enrolled</em> month (occasional merchants keep the rail but skip months), and month-over-month retention estimated from every at-risk month rather than an average over the cumulative cohort matrix.</p>
+      </div>
+
+      <table class="results">
+        <thead><tr><th>Method</th><th>Estimate</th><th>The assumption it hides</th></tr></thead>
+        <tbody>
+          <tr><td>historical</td><td>$616 mean, $105 median</td><td>realized only; a three-month-old convert looks cheap</td></tr>
+          <tr><td>basic</td><td>$3,904</td><td>every merchant lives 36 months</td></tr>
+          <tr><td>granular</td><td>$2,636</td><td>same lifespan; unweighted per-payment mean</td></tr>
+          <tr><td>traditional</td><td>$1,290</td><td>churn is definitive; under-reports at low retention</td></tr>
+        </tbody>
+      </table>
+
+      <details class="code">
+        <summary>traditional CLV per cell: hazard from at-risk months, revenue per enrolled month</summary>
+        <pre>def traditional_clv(g_merchants, g_pay):
+    at_risk = (g_merchants.dur + g_merchants.churned).sum()   # at-risk merchant-months
+    hazard = g_merchants.churned.sum() / at_risk              # monthly churn rate
+    retention = 1 - hazard
+    rev = g_pay.net_revenue.sum() / g_merchants.dur.clip(lower=1).sum()
+    return rev * retention / hazard                           # geometric-series lifetime</pre>
+      </details>
+
+      <img class="shot" src="../assets/img/virtual-card-clv/clv-matrix.png" alt="CLV per merchant by method, and traditional CLV by segment and onboarding channel" width="1079" height="379" />
+
+      <div class="prose">
+        <h3>Step 3: the number the business acts on</h3>
+        <p>CLV against fully loaded conversion cost per channel: outreach $250, integrated $180, organic $50. Nine segment-by-channel cells, one of them underwater. Paid outreach converting occasional merchants returns $149 of lifetime value against $250 of cost; the same labor pointed at high_frequency merchants returns 7x. The recommendation is routing, not heroics: move the occasional segment to self-serve enablement and spend outreach where the ceiling is high.</p>
+      </div>
+
+      <img class="shot" src="../assets/img/virtual-card-clv/cac-ceilings.png" alt="Traditional CLV versus cost to convert for each segment and channel cell" width="1079" height="429" />
+
+      <table class="results">
+        <thead><tr><th>Cell</th><th>CLV</th><th>Cost</th><th>CLV / cost</th><th>Payback</th></tr></thead>
+        <tbody>
+          <tr><td>high_frequency &times; organic</td><td>$3,189</td><td>$50</td><td>63.8x</td><td>&lt;1 month</td></tr>
+          <tr><td>high_frequency &times; integrated</td><td>$6,113</td><td>$180</td><td>34.0x</td><td>&lt;1 month</td></tr>
+          <tr><td>regular &times; integrated</td><td>$1,518</td><td>$180</td><td>8.4x</td><td>4.1 months</td></tr>
+          <tr><td>regular &times; outreach</td><td>$456</td><td>$250</td><td>1.8x</td><td>5.7 months</td></tr>
+          <tr><td>occasional &times; outreach</td><td>$149</td><td>$250</td><td>0.6x</td><td>underwater</td></tr>
+        </tbody>
+      </table>
+
+      <div class="prose">
+        <h3>Step 4: from the average merchant to this merchant</h3>
+        <p>Formulas price the average; operations wants a number per merchant. Recency, frequency, monetary (RFM) features over a trailing 12-month window, a December 2025 target month held out of the features entirely, and a 75/25 split. The linear model beats the free benchmark ("December equals November") by 17% on held-out RMSE (root mean squared error). MAPE is skipped deliberately: 40% of enrolled merchants settled nothing in the target month, and percentage error is undefined at zero. The statsmodels read then catches the trap worth a paragraph in any review: frequency and monetary correlate at 0.95, so the full model hands frequency a significant <em>negative</em> coefficient. Dropping the redundancy costs nothing in fit and returns coefficients a finance partner can read. The behavior-derived segment label stays out of the features for the same reason: it inflates R-squared to 0.70 while turning every honest coefficient statistically dead.</p>
+      </div>
+
+      <div class="cell-out">RMSE  train $104 | test $75      benchmark "December = November": $91
+MAE   train  $50 | test $41
+significant at 5% after dropping frequency: recency_months, monetary_12m, tenure_months
+R-squared 0.553 without frequency vs 0.555 with: nothing of substance lost</div>
+
+      <div class="callout" style="max-width:720px">
+        <p style="margin:0"><strong>Source &amp; data.</strong> The executed notebook and the synthetic dataset (segment-dependent churn hazards, the early-tenure hazard shock, channel and prior-rail effects, the 2024 campaign cohorts, and seasonality, all injected deterministically and documented in the generator) are on GitHub:
+        <a class="ulink" href="https://github.com/dymytryo/notebooks/tree/main/virtual_card_clv">notebooks/virtual_card_clv</a>. The retention side of the same program: <a class="ulink" href="merchant-retention.html">merchant retention case study</a>.</p>
+      </div>
+
+    </section>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+</body>
+</html>
