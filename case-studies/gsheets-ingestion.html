@@ -22,6 +22,7 @@
     table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
     table.results td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
     table.results td:first-child { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; color: var(--accent-ink); }
+    .shot { border: 1px solid var(--rule); border-radius: 12px; width: 100%; height: auto; margin: 16px 0; display: block; background: #fff; }
   </style>
 </head>
 <body>
@@ -61,6 +62,12 @@
 
     <section aria-labelledby="analysis" style="margin-top:44px">
       <div class="sec-head"><div><p class="eyebrow">The notebook</p><h2 id="analysis">The pattern, step by step</h2></div></div>
+
+      <div class="prose">
+        <p>The 2022 production workflow this pattern comes from. The notebook distills its two durable ideas (self-serve reads, snapshot-diff change capture) and hands everything downstream to dbt:</p>
+      </div>
+
+      <img class="shot" src="../assets/img/gsheets-ingestion/automation-workflow.png" alt="Original production workflow: Google Sheets read and written through API scripts, feeding the warehouse and reporting" width="1100" height="560" />
 
       <div class="prose">
         <h3>Step 1 &mdash; read a sheet like an engineer</h3>
