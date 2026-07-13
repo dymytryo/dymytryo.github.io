@@ -30,6 +30,15 @@
     .report-frame-bar a { font-size: 0.82rem; border: 1px solid var(--rule-2); border-radius: 999px; padding: 5px 12px; color: var(--ink); white-space: nowrap; }
     .report-frame-bar a:hover { border-color: var(--accent); color: var(--accent-ink); }
     .scframe { width: 100%; height: 680px; border: 0; display: block; background: #fff; }
+    .mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+    @media (max-width: 760px) { .mgrid { grid-template-columns: 1fr; } }
+    .mcard { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); padding: 18px 20px; }
+    .mcard h3 { margin: 0; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 1.05rem; }
+    .mcard h3 .ids { font-family: var(--font-mono); font-size: 0.72rem; color: var(--secondary); white-space: nowrap; }
+    .mcard .flab { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 12px 0 2px; }
+    .mcard p { margin: 0; font-size: 0.88rem; line-height: 1.55; }
+    .mcard ul { margin: 2px 0 0; padding-left: 18px; font-size: 0.86rem; line-height: 1.55; }
+    .mcard .conf { font-family: var(--font-mono); font-size: 0.76rem; color: var(--secondary); line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -228,12 +237,86 @@
       </div>
     </section>
 
+    <section aria-labelledby="measurements" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Definitions</p><h2 id="measurements">The four measurements</h2></div></div>
+
+      <div class="prose">
+        <p>Each measurement has a definition, a reason to exist, and the metrics that grade it. Together they cover the issue classes that hit data consumers hardest: late data, missing context, drifting formats, and lost or duplicated records.</p>
+      </div>
+
+      <div class="mgrid">
+        <div class="mcard">
+          <h3>Availability <span class="ids">AV-01 &#8211; AV-04</span></h3>
+          <p class="flab">Description</p>
+          <p>Evaluate the actual time of data delivery against the expected time, the service level agreement (SLA).</p>
+          <p class="flab">Context</p>
+          <p>Late data delivery disrupts dependent processes and blocks data consumers.</p>
+          <p class="flab">Metrics</p>
+          <ul>
+            <li>% of datasets delivered within schedule (freshness)</li>
+            <li>average delay in minutes beyond the warn threshold</li>
+            <li>average data age in hours at snapshot time</li>
+          </ul>
+          <p class="flab">Configuration</p>
+          <p class="conf">dbt source freshness graded from sources.yml (warn_after / error_after per source table); the artifact lands as a queryable log.</p>
+        </div>
+
+        <div class="mcard">
+          <h3>Completeness <span class="ids">CM-01 &#8211; CM-07</span></h3>
+          <p class="flab">Description</p>
+          <p>Evaluate existence and completeness of metadata and reference data.</p>
+          <p class="flab">Context</p>
+          <p>Context is absent if metadata and reference data are not provided, which leads to misinterpretation and misuse.</p>
+          <p class="flab">Metrics</p>
+          <ul>
+            <li>existence: % of tables with owner defined; % of tables and columns with metadata defined; % of tables with primary keys (PK) defined; % of foreign key (FK) relationships documented; % of reference tables documented</li>
+            <li>quality: % of models compliant with naming conventions</li>
+          </ul>
+          <p class="flab">Configuration</p>
+          <p class="conf">daily catalog snapshots aggregated from information_schema plus the governance catalog (owner, steward, PK/FK documentation).</p>
+        </div>
+
+        <div class="mcard">
+          <h3>Consistency <span class="ids">CN-01 &#8211; CN-04</span></h3>
+          <p class="flab">Description</p>
+          <p>Evaluate properties and formatting to ensure consistency in field representation.</p>
+          <p class="flab">Context</p>
+          <p>Seamless usage and reliable querying depend on uniform formatting.</p>
+          <p class="flab">Metrics</p>
+          <ul>
+            <li>% of numeric fields with consistent precision across layers</li>
+            <li>% of string fields with consistent case</li>
+            <li>number of conflicting definitions for the &ldquo;same&rdquo; field in different tables</li>
+            <li>% of records using the loader default vs the business expectation</li>
+          </ul>
+          <p class="flab">Configuration</p>
+          <p class="conf">catalog-driven checks on column metadata; value-level profiling on landed data.</p>
+        </div>
+
+        <div class="mcard">
+          <h3>Expectations <span class="ids">EX-01 &#8211; EX-03</span></h3>
+          <p class="flab">Description</p>
+          <p>Evaluate record counts against expectations.</p>
+          <p class="flab">Context</p>
+          <p>Records can be lost or duplicated in transit; reconciling the actual row count with the source system&rsquo;s control count ensures completeness.</p>
+          <p class="flab">Metrics</p>
+          <ul>
+            <li>records counted vs the control record, as % difference</li>
+            <li>current record count vs the trailing 28-day history, in standard deviations from the mean (z-score)</li>
+            <li>duplicate primary keys on landed data</li>
+          </ul>
+          <p class="flab">Configuration</p>
+          <p class="conf">load manifest carries a control count per extract; uniqueness is point-in-time correct over soft deletes.</p>
+        </div>
+      </div>
+    </section>
+
     <section aria-labelledby="analysis" style="margin-top:44px">
       <div class="sec-head"><div><p class="eyebrow">The framework</p><h2 id="analysis">How it works, step by step</h2></div></div>
 
       <div class="prose">
         <h3>Step 1: four measurements, one registry</h3>
-        <p>Every check lives in a YAML registry with a measurement, a SQL file, a target, a severity, and an owner. <strong>Availability</strong> (did data arrive on schedule), <strong>Completeness</strong> (does it carry its metadata context), <strong>Consistency</strong> (is representation uniform), <strong>Expectations</strong> (did the right number of records arrive). Adding a check is a YAML entry plus a SQL file, with no runner changes.</p>
+        <p>Every check lives in a YAML registry with a measurement, a SQL file, a target, a severity, and an owner; the four measurements defined above are the grouping. Adding a check is a YAML entry plus a SQL file, with no runner changes.</p>
       </div>
 
       <details class="code">
