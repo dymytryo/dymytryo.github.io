@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Merchant retention for a virtual card program — Dmytro Valiaiev</title>
-  <meta name="description" content="Case study: the North Star Metric for a virtual card program in SQL — change data capture to enrollment history, dbt-style marts under Athena's scan cap, and 3-month cohort retention with activity and enrollment lenses separated." />
+  <title>Merchant retention for a virtual card program: Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: the North Star Metric for a virtual card program in SQL, from change data capture to enrollment history, dbt-style marts under Athena's scan cap, and 3-month cohort retention with activity and enrollment lenses separated." />
   <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -22,6 +22,7 @@
     table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
     table.results td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
     table.results td:first-child { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; color: var(--accent-ink); }
+    .shot { border: 1px solid var(--rule); border-radius: 12px; width: 100%; height: auto; margin: 16px 0; display: block; background: #fff; }
   </style>
 </head>
 <body>
@@ -55,7 +56,7 @@
 
     <div class="prose">
       <div class="tags" style="margin-top:16px">
-        <span>Jupyter</span><span>SQL &middot; DuckDB</span><span>cohort retention</span><span>CDC</span><span>dbt marts</span>
+        <span>Jupyter</span><span>SQL &middot; DuckDB</span><span>cohort retention</span><span>change data capture (CDC)</span><span>dbt marts</span>
       </div>
     </div>
 
@@ -64,7 +65,7 @@
 
       <div class="prose">
         <h3>Step 1: from a change log to enrollment history</h3>
-        <p>The warehouse records every field change as a row: entity, field, previous value, current value, timestamp. Joining the program is <code>payment_method</code> changing to <code>'12'</code>; churning is a change away from it. Two production facts make this harder than it sounds: the log contains exact duplicate rows (a loader that replays files), and one churn batch was applied by a manual extract-transform-load (ETL) directly in the database, so it never produced log rows at all. Ops kept the list; the query unions it in. Each join is then paired with the merchant&rsquo;s next event, and open enrollments get the analysis anchor as their fill date.</p>
+        <p>The warehouse records every field change as a row: entity, field, previous value, current value, timestamp. Joining the program is <code>payment_method</code> changing to <code>'Credit Card'</code>; churning is a change away from it. Two production facts make this harder than it sounds: the log contains exact duplicate rows (a loader that replays files), and one churn batch was applied by a manual extract-transform-load (ETL) directly in the database, so it never produced log rows at all. Ops kept the list; the query unions it in. Each join is then paired with the merchant&rsquo;s next event, and open enrollments get the analysis anchor as their fill date.</p>
       </div>
 
       <details class="code">
@@ -76,11 +77,11 @@
         val_prev, val_curr
     FROM change_log
     WHERE record_type = 'payment_method'
-      AND (val_curr = '12' OR val_prev = '12')
+      AND (val_curr = 'Credit Card' OR val_prev = 'Credit Card')
 ),
 events AS (
     SELECT merchant_id, change_date,
-           CASE WHEN val_curr = '12' THEN 'join' ELSE 'churn' END AS event
+           CASE WHEN val_curr = 'Credit Card' THEN 'join' ELSE 'churn' END AS event
     FROM method_changes
     UNION ALL                      -- the churn batch that never hit the log
     SELECT entity_id, CAST(churn_date AS DATE), 'churn'
@@ -117,6 +118,8 @@ WHERE event = 'join'</pre>
           <tr><td>2023-06</td><td>1,279</td><td>86</td><td>110</td><td>1,255</td><td>manual churn batch, visible only because the off-log list was unioned in</td></tr>
         </tbody>
       </table>
+
+      <img class="shot" src="../assets/img/merchant-retention/monthly-movement.png" alt="Monthly joined and churned merchants with end-of-month enrollment trend" width="1089" height="370" />
 
       <div class="prose">
         <p>Miss the manual batch and every EOM from June on is overstated by 45 merchants; miss the wrongful-conversion wave and the campaign looks like a clean win. The movement table is where those stories get caught.</p>
@@ -160,6 +163,8 @@ GROUP BY 1</pre>
         <p>Retention has to be asked two ways. The <em>activity</em> lens (transacted in M&minus;3 and in M) answers &ldquo;is the volume repeating?&rdquo;; the <em>enrollment</em> lens (still on the payment method) answers &ldquo;did they leave the program?&rdquo;. Conflate them and occasionally paid merchants look like churn:</p>
       </div>
 
+      <img class="shot" src="../assets/img/merchant-retention/retention-lenses.png" alt="Three-month retention measured three ways: enrollment, activity, and retained volume share" width="889" height="370" />
+
       <table class="results">
         <thead><tr><th>Segment</th><th>Enrollment retention</th><th>Activity retention</th><th>Read</th></tr></thead>
         <tbody>
@@ -172,6 +177,8 @@ GROUP BY 1</pre>
       <div class="prose">
         <p>That asymmetry is why the North Star divides by the transactable (enrollment) denominator, and why volume retention (73%) runs below merchant retention: the heaviest payers churn the method hardest. Total volume still grows through all of it, acquisition outpacing churn, which is the conclusion the original dashboard existed to defend.</p>
       </div>
+
+      <img class="shot" src="../assets/img/merchant-retention/volume-growth.png" alt="Enrolled vs paid merchants monthly, and total program volume growing through the period" width="1089" height="370" />
 
       <div class="callout" style="max-width:720px">
         <p style="margin:0"><strong>Source &amp; data.</strong> The executed notebook, the synthetic dataset (duplicate CDC rows, the off-log churn batch, the campaign spike and reversals all injected deterministically and documented in the generator), and the validation that recovers the ground truth exactly are on GitHub:
