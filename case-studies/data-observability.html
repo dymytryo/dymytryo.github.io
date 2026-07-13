@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Data platform observability — Dmytro Valiaiev</title>
-  <meta name="description" content="Case study: taking a solar analytics warehouse of 1,000+ dbt models from no observability to full coverage through freshness thresholds, count reconciliation, catalog coverage, transition-based alerting, and four live scorecards." />
+  <meta name="description" content="Case study: taking a solar analytics warehouse of 4,000+ dbt models from no observability to full coverage, cutting data downtime by 45% through freshness thresholds, count reconciliation, catalog coverage, transition-based alerting, and four live scorecards." />
   <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -51,13 +51,13 @@
     <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
       <p class="eyebrow">Case study &middot; Framework</p>
       <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Data platform observability</h1>
-      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">A solar analytics warehouse runs over 1,000 dbt models, fed by customer relationship management (CRM), billing, field service, reference feeds, and multiple Internet of Things (IoT) telemetry ingestions from the installed solar fleet. Before this work there was no observability layer: consumers discovered late loads and broken joins before engineers did. This framework took the platform to full coverage: four measurements graded daily, four scorecards, and alerting that pages the right owner exactly once.</p>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">Sunrun&rsquo;s analytics warehouse runs over 4,000 dbt models, fed by customer relationship management (CRM), billing, field service, reference feeds, and multiple Internet of Things (IoT) telemetry ingestions from the installed solar fleet. Before this work there was no observability layer: consumers discovered late loads and broken joins before engineers did. This framework took the platform to full coverage: four measurements graded daily, four scorecards, and alerting that pages the right owner exactly once. Data downtime fell by 45%.</p>
 
       <div class="metrics">
-        <div class="metric"><div class="num">1,000+</div><div class="label">dbt models brought under observability</div></div>
+        <div class="metric"><div class="num">4K+</div><div class="label">dbt models brought under observability</div></div>
+        <div class="metric"><div class="num">&minus;45%</div><div class="label">data downtime after full rollout</div></div>
         <div class="metric"><div class="num">none &rarr; full</div><div class="label">observability coverage, one quarter</div></div>
-        <div class="metric"><div class="num">IoT</div><div class="label">multiple telemetry ingestions with freshness thresholds</div></div>
-        <div class="metric"><div class="num">4</div><div class="label">scorecards: one per audience</div></div>
+        <div class="metric"><div class="num">1</div><div class="label">page per incident: grouped, deduplicated alerting</div></div>
       </div>
 
       <figure class="banner" role="img" aria-label="Flow from sources through the warehouse and daily checks to scorecards and alerts">
@@ -96,7 +96,7 @@
             <path d="M240 91 a52 13 0 0 0 104 0"/>
             <path d="M240 120 a52 13 0 0 0 104 0"/>
           </g>
-          <text x="292" y="187" font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63" text-anchor="middle">1,000+ dbt models</text>
+          <text x="292" y="187" font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63" text-anchor="middle">4,000+ dbt models</text>
           <!-- arrow warehouse -> checks -->
           <g fill="none" stroke="#B4441E" stroke-width="2.5">
             <path d="M352 105 C 390 105 398 105 428 105"/>
@@ -106,7 +106,7 @@
           <g fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5">
             <rect x="452" y="52" width="204" height="106" rx="10"/>
           </g>
-          <text x="554" y="42" font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63" text-anchor="middle">CHECKS &middot; DAILY 07:00</text>
+          <text x="554" y="42" font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63" text-anchor="middle">CHECKS &#183; DAILY 07:00</text>
           <g font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63">
             <text x="472" y="78">freshness</text>
             <text x="472" y="102">counts</text>
@@ -140,7 +140,7 @@
             <rect x="765" y="78" width="48" height="20" rx="4"/>
           </g>
           <rect x="820" y="78" width="48" height="20" rx="4" fill="#F3D9CC" stroke="#B4441E" stroke-width="1.2"/>
-          <text x="888" y="70" font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63">&times;4</text>
+          <text x="888" y="70" font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63">&#215;4</text>
           <text x="816" y="124" font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63" text-anchor="middle">scorecards</text>
           <!-- bell -->
           <g fill="#B4441E">
@@ -212,6 +212,19 @@
           <a href="../assets/reports/observability/users.html" target="_blank" rel="noopener">Open full screen &nearr;</a>
         </div>
         <iframe class="scframe" src="../assets/reports/observability/users.html" loading="lazy" title="Users and stewards scorecard: coverage of the operating model"></iframe>
+      </div>
+    </section>
+
+    <section aria-labelledby="outcomes" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Outcomes</p><h2 id="outcomes">What changed in production</h2></div></div>
+
+      <div class="prose">
+        <p>Data downtime is the time from a data issue starting to it being detected and resolved. Cutting it is the point of the framework:</p>
+        <ol>
+          <li><strong>Data downtime fell by 45%.</strong> Issues surface at the 07:00 grade with the failing table, owner, and probable cause attached, instead of days later as a consumer bug report. Detection moved from &ldquo;when someone notices the dashboard&rdquo; to same morning, and resolution starts from a drill-down rather than an investigation.</li>
+          <li><strong>On-call overhead dropped with it.</strong> One page per incident (alerts group by source system), warn-level noise held back unless the check is high severity, no re-pages while an incident stays open, and every page routes to the owning team plus the table&rsquo;s steward. Morning triage became one Tests page instead of spot-checking dashboards across the warehouse; a month with a telemetry outage, a double load, and a stale feed produced 17 alerts, not 170.</li>
+          <li><strong>Ownership scales without a bottleneck.</strong> Coverage metrics trend on scorecards instead of paging, targets ratchet up as the governance push lands, and stewards see only their own tables.</li>
+        </ol>
       </div>
     </section>
 
