@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Merchant retention for a virtual card program — Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: the North Star Metric for a virtual card program in SQL — change data capture to enrollment history, dbt-style marts under Athena's scan cap, and 3-month cohort retention with activity and enrollment lenses separated." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+  <style>
+    details.code { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); margin: 16px 0; overflow: hidden; }
+    details.code summary { font-family: var(--font-mono); font-size: 0.82rem; color: var(--secondary); padding: 12px 18px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
+    details.code summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+    details.code[open] summary::before { transform: rotate(90deg); }
+    details.code summary:hover { color: var(--ink); }
+    details.code pre { margin: 0; padding: 4px 18px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6; color: var(--ink); }
+    .cell-out { background: var(--surface-2); border-radius: 12px; padding: 16px 20px; margin: 16px 0; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink); }
+    table.results { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.9rem; }
+    table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
+    table.results td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    table.results td:first-child { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; color: var(--accent-ink); }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study &middot; Notebook</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Merchant retention for a virtual card program</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">A payments program converts merchants from paper check to a single-use account (SUA) virtual card, and leadership wants one number that says whether it is working. The North Star Metric (NSM): the share of SUA volume retained over a 3-month window. Getting it required turning a duplicate-ridden change log into enrollment history, recovering a churn batch that never hit the log, and modeling marts before the metric, because the warehouse capped every query at 100 GB scanned.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">86.5%</div><div class="label">3-month enrollment retention</div></div>
+        <div class="metric"><div class="num">73%</div><div class="label">volume retained: the North Star</div></div>
+        <div class="metric"><div class="num">45</div><div class="label">churns recovered from an off-log manual backfill</div></div>
+        <div class="metric"><div class="num">100 GB</div><div class="label">per-query scan cap the marts designed around</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Jupyter</span><span>SQL &middot; DuckDB</span><span>cohort retention</span><span>CDC</span><span>dbt marts</span>
+      </div>
+    </div>
+
+    <section aria-labelledby="analysis" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">The notebook</p><h2 id="analysis">The analysis, step by step</h2></div></div>
+
+      <div class="prose">
+        <h3>Step 1: from a change log to enrollment history</h3>
+        <p>The warehouse records every field change as a row: entity, field, previous value, current value, timestamp. Joining the program is <code>payment_method</code> changing to <code>'12'</code>; churning is a change away from it. Two production facts make this harder than it sounds: the log contains exact duplicate rows (a loader that replays files), and one churn batch was applied by a manual extract-transform-load (ETL) directly in the database, so it never produced log rows at all. Ops kept the list; the query unions it in. Each join is then paired with the merchant&rsquo;s next event, and open enrollments get the analysis anchor as their fill date.</p>
+      </div>
+
+      <details class="code">
+        <summary>events &rarr; enrollment stints: dedupe, union the off-log batch, pair with LEAD</summary>
+        <pre>WITH method_changes AS (          -- SUA-related rows, deduplicated
+    SELECT DISTINCT
+        entity_id                  AS merchant_id,
+        CAST(change_date AS DATE)  AS change_date,
+        val_prev, val_curr
+    FROM change_log
+    WHERE record_type = 'payment_method'
+      AND (val_curr = '12' OR val_prev = '12')
+),
+events AS (
+    SELECT merchant_id, change_date,
+           CASE WHEN val_curr = '12' THEN 'join' ELSE 'churn' END AS event
+    FROM method_changes
+    UNION ALL                      -- the churn batch that never hit the log
+    SELECT entity_id, CAST(churn_date AS DATE), 'churn'
+    FROM ops_manual_updates
+),
+ordered AS (
+    SELECT *,
+           LEAD(change_date) OVER (PARTITION BY merchant_id ORDER BY change_date) AS next_date,
+           LEAD(event)       OVER (PARTITION BY merchant_id ORDER BY change_date) AS next_event
+    FROM events
+)
+SELECT merchant_id,
+       change_date AS join_date,
+       CASE WHEN next_event = 'churn' THEN next_date END AS churn_date,
+       COALESCE(CASE WHEN next_event = 'churn' THEN next_date END,
+                DATE '2024-01-01') AS filled_churn_date
+FROM ordered
+WHERE event = 'join'</pre>
+      </details>
+
+      <div class="cell-out">2614 enrollment stints | 1418 still enrolled | 45 manual churns recovered | 66 merchants re-joined | 0 overlaps</div>
+
+      <div class="prose">
+        <h3>Step 2: monthly movement is the audit trail</h3>
+        <p>Beginning-of-month (BOM), joined, churned, end-of-month (EOM), on a plain <code>generate_series</code> month spine. The period tells its own story:</p>
+      </div>
+
+      <table class="results">
+        <thead><tr><th>Month</th><th>BOM</th><th>Joined</th><th>Churned</th><th>EOM</th><th>What happened</th></tr></thead>
+        <tbody>
+          <tr><td>2023-01</td><td>843</td><td>256</td><td>35</td><td>1,064</td><td>outreach campaign lands</td></tr>
+          <tr><td>2023-02</td><td>1,064</td><td>331</td><td>35</td><td>1,360</td><td>campaign peak</td></tr>
+          <tr><td>2023-03</td><td>1,360</td><td>77</td><td>208</td><td>1,229</td><td>wrongful conversions reverted: the method had been switched without proper merchant consent</td></tr>
+          <tr><td>2023-06</td><td>1,279</td><td>86</td><td>110</td><td>1,255</td><td>manual churn batch, visible only because the off-log list was unioned in</td></tr>
+        </tbody>
+      </table>
+
+      <div class="prose">
+        <p>Miss the manual batch and every EOM from June on is overstated by 45 merchants; miss the wrongful-conversion wave and the campaign looks like a clean win. The movement table is where those stories get caught.</p>
+        <h3>Step 3: marts before metric</h3>
+        <p>Amazon Athena capped each query at 100 GB scanned, and a year of the raw change log plus payments blew past it. The production fix was dbt: model <code>payment_detail_agg</code> (month &times; merchant &times; method, with volume and count) and <code>merchant_retention_record</code> (one row per enrollment stint) once, then let every report and every analyst query the small tables. It also removed the dependency on whoever could re-derive the CDC pairing from memory.</p>
+        <h3>Step 4: the North Star, and what it replaced</h3>
+        <p>The original computed cohort retention in a single pass with Presto map/array algebra, because it could not afford to scan the table twice:</p>
+      </div>
+
+      <details class="code">
+        <summary>the 2022 version: map_agg, array_intersect, reduce (what aged out)</summary>
+        <pre>1e0 * cardinality(array_intersect(
+          map_keys(lag(transaction_volume_M, 3) OVER (ORDER BY M)),
+          map_keys(transaction_volume_M))
+) / cardinality(map_keys(lag(transaction_volume_M, 3) OVER (ORDER BY M)))
+-- ... and reduce(map_values(map_zip_with(...))) to sum retained volume</pre>
+      </details>
+
+      <div class="prose">
+        <p>It worked, and it was unreadable. With marts, the same metric is a self-join anyone can review:</p>
+      </div>
+
+      <details class="code">
+        <summary>the metric over marts: cohort M-3 joined to month M</summary>
+        <pre>SELECT
+    (c.month + INTERVAL 3 MONTH)::DATE                AS month,
+    count(*)                                          AS transacted_m3,
+    count(t.merchant_id)                              AS still_transacting,
+    sum(c.transaction_volume)                         AS volume_m3,
+    sum(CASE WHEN t.merchant_id IS NOT NULL
+             THEN t.transaction_volume END)           AS volume_retained
+FROM transacting c
+LEFT JOIN transacting t
+  ON t.merchant_id = c.merchant_id
+ AND t.month = (c.month + INTERVAL 3 MONTH)::DATE
+GROUP BY 1</pre>
+      </details>
+
+      <div class="prose">
+        <h3>Step 5: two lenses, one honest answer</h3>
+        <p>Retention has to be asked two ways. The <em>activity</em> lens (transacted in M&minus;3 and in M) answers &ldquo;is the volume repeating?&rdquo;; the <em>enrollment</em> lens (still on the payment method) answers &ldquo;did they leave the program?&rdquo;. Conflate them and occasionally paid merchants look like churn:</p>
+      </div>
+
+      <table class="results">
+        <thead><tr><th>Segment</th><th>Enrollment retention</th><th>Activity retention</th><th>Read</th></tr></thead>
+        <tbody>
+          <tr><td>occasional</td><td>92.0%</td><td>51.1%</td><td>keep the method (interchange barely registers), just skip months</td></tr>
+          <tr><td>regular</td><td>85.4%</td><td>85.6%</td><td>lenses agree: they transact every month</td></tr>
+          <tr><td>high_frequency</td><td>65.3%</td><td>65.9%</td><td>revert the most: interchange and reconciliation costs compound weekly</td></tr>
+        </tbody>
+      </table>
+
+      <div class="prose">
+        <p>That asymmetry is why the North Star divides by the transactable (enrollment) denominator, and why volume retention (73%) runs below merchant retention: the heaviest payers churn the method hardest. Total volume still grows through all of it, acquisition outpacing churn, which is the conclusion the original dashboard existed to defend.</p>
+      </div>
+
+      <div class="callout" style="max-width:720px">
+        <p style="margin:0"><strong>Source &amp; data.</strong> The executed notebook, the synthetic dataset (duplicate CDC rows, the off-log churn batch, the campaign spike and reversals all injected deterministically and documented in the generator), and the validation that recovers the ground truth exactly are on GitHub:
+        <a class="ulink" href="https://github.com/dymytryo/notebooks/tree/main/merchant_retention">notebooks/merchant_retention</a></p>
+      </div>
+
+    </section>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+</body>
+</html>

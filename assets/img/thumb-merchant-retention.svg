@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#F6F1E9"/>
+  <!-- chart panel -->
+  <g fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5">
+    <rect x="42" y="42" width="230" height="166" rx="8"/>
+  </g>
+  <!-- axes -->
+  <g stroke="#D8CDBA" stroke-width="1.5">
+    <line x1="66" y1="60" x2="66" y2="186"/>
+    <line x1="66" y1="186" x2="254" y2="186"/>
+  </g>
+  <!-- retention curves: three lenses -->
+  <path d="M66 78 C 120 82 180 86 254 90" fill="none" stroke="#8A7B63" stroke-width="2.5"/>
+  <path d="M66 78 C 115 98 175 110 254 116" fill="none" stroke="#B4441E" stroke-width="2.5"/>
+  <path d="M66 78 C 110 118 170 138 254 146" fill="none" stroke="#D8CDBA" stroke-width="2.5"/>
+  <!-- cohort start dot -->
+  <circle cx="66" cy="78" r="5" fill="#B4441E"/>
+  <!-- curve end markers -->
+  <g>
+    <circle cx="254" cy="90" r="4" fill="#FFFFFF" stroke="#8A7B63" stroke-width="1.5"/>
+    <circle cx="254" cy="116" r="4" fill="#B4441E"/>
+    <circle cx="254" cy="146" r="4" fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5"/>
+  </g>
+  <!-- M-3 -> M cohort arrow under axis -->
+  <g fill="none" stroke="#8A7B63" stroke-width="1.8">
+    <path d="M92 196 h120"/>
+  </g>
+  <path d="M212 191 L 222 196 L 212 201 Z" fill="#8A7B63"/>
+  <!-- merchant cohort grid -->
+  <g fill="#FFFFFF" stroke="#8A7B63" stroke-width="1.5">
+    <rect x="296" y="52" width="18" height="18" rx="4"/>
+    <rect x="320" y="52" width="18" height="18" rx="4"/>
+    <rect x="344" y="52" width="18" height="18" rx="4"/>
+    <rect x="296" y="76" width="18" height="18" rx="4"/>
+    <rect x="320" y="76" width="18" height="18" rx="4"/>
+    <rect x="296" y="100" width="18" height="18" rx="4"/>
+  </g>
+  <!-- churned members of the cohort -->
+  <g fill="#F3D9CC" stroke="#B4441E" stroke-width="1.5">
+    <rect x="344" y="76" width="18" height="18" rx="4"/>
+    <rect x="320" y="100" width="18" height="18" rx="4"/>
+    <rect x="344" y="100" width="18" height="18" rx="4"/>
+  </g>
+  <!-- retained dollar -->
+  <g stroke="#B4441E" stroke-width="2" fill="#F6F1E9">
+    <circle cx="329" cy="164" r="24"/>
+  </g>
+  <text x="329" y="173" font-family="ui-monospace, monospace" font-size="24" fill="#B4441E" text-anchor="middle">$</text>
+  <g stroke="#8A7B63" stroke-width="1.5" stroke-linecap="round">
+    <line x1="300" y1="202" x2="358" y2="202"/>
+  </g>
+</svg>
