@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#F6F1E9"/>
+  <!-- chart panel -->
+  <g fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5">
+    <rect x="42" y="42" width="230" height="166" rx="8"/>
+  </g>
+  <g stroke="#D8CDBA" stroke-width="1.5">
+    <line x1="66" y1="60" x2="66" y2="186"/>
+    <line x1="66" y1="186" x2="254" y2="186"/>
+  </g>
+  <!-- actual: spiky weekly series with month-end teeth, trending up -->
+  <path d="M66 160 L78 150 L90 156 L102 142 L114 150 L126 118 L138 144 L150 134 L162 140 L174 126 L186 134 L198 96 L210 124 L222 114 L234 120 L246 108"
+        fill="none" stroke="#8A7B63" stroke-width="2.2"/>
+  <!-- forecast: accent dashed tracking it -->
+  <path d="M66 156 L78 148 L90 152 L102 145 L114 147 L126 124 L138 141 L150 136 L162 138 L174 129 L186 131 L198 102 L210 121 L222 116 L234 118 L246 111"
+        fill="none" stroke="#B4441E" stroke-width="2" stroke-dasharray="5 3"/>
+  <!-- window bracket under axis -->
+  <g stroke="#8A7B63" stroke-width="1.5" fill="none">
+    <path d="M90 196 h96 M90 192 v8 M186 192 v8"/>
+  </g>
+  <path d="M196 191 L 206 196 L 196 201 Z" fill="#8A7B63"/>
+  <!-- LSTM memory cell -->
+  <g fill="#FFFFFF" stroke="#8A7B63" stroke-width="1.5">
+    <rect x="294" y="58" width="70" height="96" rx="10"/>
+  </g>
+  <!-- cell-state line through the cell -->
+  <line x1="294" y1="80" x2="364" y2="80" stroke="#B4441E" stroke-width="2.2"/>
+  <path d="M356 75 L 366 80 L 356 85 Z" fill="#B4441E"/>
+  <!-- three gates on the state -->
+  <g stroke="#B4441E" stroke-width="1.8">
+    <circle cx="308" cy="80" r="6.5" fill="#F6F1E9"/>
+    <circle cx="329" cy="80" r="6.5" fill="#F3D9CC"/>
+    <circle cx="350" cy="80" r="6.5" fill="#F6F1E9"/>
+  </g>
+  <!-- gate inputs rising from below -->
+  <g stroke="#8A7B63" stroke-width="1.5" fill="none">
+    <path d="M308 130 v-42 M329 130 v-42 M350 130 v-42"/>
+  </g>
+  <g stroke="#8A7B63" stroke-width="1.5" fill="#FFFFFF">
+    <rect x="300" y="130" width="16" height="12" rx="3"/>
+    <rect x="321" y="130" width="16" height="12" rx="3"/>
+    <rect x="342" y="130" width="16" height="12" rx="3"/>
+  </g>
+  <!-- output arrow to the dollar -->
+  <line x1="329" y1="154" x2="329" y2="168" stroke="#8A7B63" stroke-width="1.5"/>
+  <g stroke="#B4441E" stroke-width="2" fill="#F6F1E9">
+    <circle cx="329" cy="188" r="18"/>
+  </g>
+  <text x="329" y="195" font-family="ui-monospace, monospace" font-size="18" fill="#B4441E" text-anchor="middle">$</text>
+</svg>

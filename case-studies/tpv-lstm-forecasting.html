@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Forecasting daily settled TPV with an LSTM: Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: an LSTM forecaster for daily settled TPV on a virtual card program, built by the book and evaluated honestly. The sequence model ties a linear baseline on identical inputs; both cut the desk heuristic's error by two thirds. The verdict, the ablations, and what to tell end users." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+  <style>
+    details.code { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); margin: 16px 0; overflow: hidden; }
+    details.code summary { font-family: var(--font-mono); font-size: 0.82rem; color: var(--secondary); padding: 12px 18px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
+    details.code summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+    details.code[open] summary::before { transform: rotate(90deg); }
+    details.code summary:hover { color: var(--ink); }
+    details.code pre { margin: 0; padding: 4px 18px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6; color: var(--ink); }
+    .cell-out { background: var(--surface-2); border-radius: 12px; padding: 16px 20px; margin: 16px 0; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: var(--ink); }
+    table.results { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.9rem; }
+    table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
+    table.results td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    table.results td:first-child { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; color: var(--accent-ink); }
+    .shot { border: 1px solid var(--rule); border-radius: 12px; width: 100%; height: auto; margin: 16px 0; display: block; background: #fff; }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study &middot; Notebook</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Forecasting daily settled TPV with an LSTM</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">Treasury sizes funding lines against tomorrow's settled TPV (total payment volume); operations staffs against it; finance paces the month with same-weekday-last-week heuristics. This study builds an LSTM forecaster by the book, evaluates it the way the book demands, and reports the verdict most deep-learning write-ups bury: the sequence model ties a linear baseline on identical inputs. Both cut the desk heuristic's error by two thirds. The cheaper model ships; the harness stays warm.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">3x</div><div class="label">error reduction vs the desk pacing heuristics</div></div>
+        <div class="metric"><div class="num">4.1%</div><div class="label">MAPE, one-day-ahead, on a full held-out year</div></div>
+        <div class="metric"><div class="num">2/10</div><div class="label">seeds that beat the linear baseline: the tie that decided the ship call</div></div>
+        <div class="metric"><div class="num">~1 min</div><div class="label">full retraining cost on a laptop CPU, so the harness stays warm for free</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Jupyter</span><span>Keras 3 &middot; JAX</span><span>LSTM</span><span>time-series forecasting</span><span>payments</span>
+      </div>
+    </div>
+
+    <section aria-labelledby="analysis" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">The notebook</p><h2 id="analysis">The analysis, step by step</h2></div></div>
+
+      <div class="prose">
+        <h3>Step 1: know the series before modeling it</h3>
+        <p>Three years of daily payment operations: issued volume net of voids settles over the next one to three business days, on a weekday funding rhythm, with a month-end crunch of AP (accounts payable) runs, holiday dips, compounding growth, and one operational incident, a duplicate-issuance bug in March 2025 that spikes the void rate and decays over two weeks. Settlement only happens on business days, so the model works on the business-day series: forecasting a Saturday zero is not skill.</p>
+      </div>
+
+      <img class="shot" src="../assets/img/tpv-lstm-forecasting/series-overview.png" alt="Three years of issued and settled volume, a six-week zoom, and the March 2025 void incident" width="1079" height="809" />
+
+      <div class="prose">
+        <h3>Step 2: sequence prediction as supervised learning</h3>
+        <p>The book's data-preparation recipe: each example is the last 28 business days of features (settled TPV, issued volume, void rate, day-of-week encoded on a circle, month-end and post-holiday flags); the label is the next day's settled TPV. Scaling is fit on training rows only, the split is chronological (train 2023 through 2024-09, validate 2024-Q4, test all of 2025), and the tensor is the `[samples, timesteps, features]` shape Keras expects, printed rather than assumed.</p>
+      </div>
+
+      <img class="shot" src="../assets/img/tpv-lstm-forecasting/window-schematic.png" alt="Sliding window schematic: 28 business days of features predict the next day" width="1080" height="250" />
+
+      <div class="prose">
+        <h3>Step 3: the honesty gate, then the lifecycle</h3>
+        <p>Four baselines come first: persistence, seasonal naive, a moving average, and a linear regression on the flattened window, the fairest fight, since it sees identical information without recurrence. Then the book's lifecycle: define (48 LSTM units, one Dense output), compile (mean squared error, Adam), fit (early stopping on a 2024-Q4 validation slice, learning-rate reduction on plateau), diagnose via train/validation loss curves, and compare vanilla against a stacked variant, which loses, as depth on 400 training windows usually does.</p>
+      </div>
+
+      <details class="code">
+        <summary>the whole model: define, compile, fit</summary>
+        <pre>model = keras.Sequential([
+    keras.Input(shape=(28, 7)),          # [timesteps, features]
+    layers.LSTM(48),                     # 4 x 48 x (7+48+1) = 10,752 params: the gates
+    layers.Dense(1),
+])
+model.compile(loss='mse', optimizer=keras.optimizers.Adam(1e-3))
+model.fit(X_train, y_train, validation_data=(X_val, y_val),
+          epochs=200, batch_size=32,
+          callbacks=[EarlyStopping(patience=25, restore_best_weights=True),
+                     ReduceLROnPlateau(factor=0.5, patience=10)])</pre>
+      </details>
+
+      <table class="results">
+        <thead><tr><th>Model</th><th>RMSE (held-out 2025)</th><th>MAPE</th></tr></thead>
+        <tbody>
+          <tr><td>seasonal naive (the desk rule)</td><td>$2,023k</td><td>30.4%</td></tr>
+          <tr><td>persistence</td><td>$740k</td><td>11.0%</td></tr>
+          <tr><td>linear regression, same window</td><td>$264k</td><td>4.4%</td></tr>
+          <tr><td>vanilla LSTM (48)</td><td>$259k</td><td>4.1%</td></tr>
+          <tr><td>LSTM 10-seed ensemble</td><td>$268k</td><td>4.4%</td></tr>
+        </tbody>
+      </table>
+
+      <div class="prose">
+        <h3>Step 4: one run is not evidence</h3>
+        <p>Neural networks are stochastic, so the book prescribes repeated evaluation. Ten refits varying only the seed: RMSE runs $254k to $346k, two of ten beat the linear baseline, and averaging the ten predictions (the ensemble that would actually ship) lands at $268k against linear's $264k. That is a tie, and calling it anything else is marketing. The ship decision follows from the tie: production gets the linear model, the LSTM harness stays warm, and the switch criteria are explicit: multi-day horizons, intraday grain, or interacting series, the settings where a linear window model compounds its errors.</p>
+      </div>
+
+      <img class="shot" src="../assets/img/tpv-lstm-forecasting/seed-stability.png" alt="Ten training seeds and their ensemble against the frozen baselines" width="1080" height="329" />
+
+      <div class="prose">
+        <h3>Step 5: test the stories, then brief the users</h3>
+        <p>Two claims got tested instead of asserted. The void-rate feature, narratively the "incident detector", ablated to nothing: removing it changed incident-window error by -4%, because the damage already arrives through issuance and settlement volume. And the update experiment (refit scalers and model through June 2025, compare on H2) showed a frozen model holds up within the year, so refit cadence is a monitoring decision, not a decay emergency. The forecast itself: 4.1% MAPE across a full held-out year, month-end crunches anticipated rather than chased, and March, the incident month, priced as the cost of operating on end-of-day files.</p>
+      </div>
+
+      <img class="shot" src="../assets/img/tpv-lstm-forecasting/forecast-2025.png" alt="2025 one-day-ahead forecast against actuals, with a six-week zoom" width="1077" height="649" />
+
+      <div class="cell-out">seeds: RMSE $293k mean, $32k std, range $254k..$346k | ensemble $268k vs linear $264k
+ablation: incident MAE $239k with void rate, $230k without -> feature is a passenger
+update: refit through 2025-06 gains -1% on H2 -> quarterly refit + monthly baseline monitoring</div>
+
+      <div class="callout" style="max-width:720px">
+        <p style="margin:0"><strong>Source &amp; data.</strong> The executed notebook (Keras 3 on JAX, ~1 minute to retrain from scratch) and the synthetic dataset (weekday funding, month-end crunch, load-dependent settlement lag, the decaying void incident, all injected deterministically and documented in the generator) are on GitHub:
+        <a class="ulink" href="https://github.com/dymytryo/notebooks/tree/main/tpv_lstm_forecasting">notebooks/tpv_lstm_forecasting</a>. The same program's economics: <a class="ulink" href="virtual-card-clv.html">virtual card CLV</a> and <a class="ulink" href="merchant-retention.html">merchant retention</a>.</p>
+      </div>
+
+    </section>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+</body>
+</html>
