@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#F6F1E9"/>
+  <!-- calendar: first business day -->
+  <g fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5">
+    <rect x="46" y="60" width="108" height="112" rx="10"/>
+  </g>
+  <rect x="46" y="60" width="108" height="26" rx="10" fill="#F3D9CC" stroke="#B4441E" stroke-width="1.5"/>
+  <g fill="#D8CDBA">
+    <rect x="60" y="98" width="16" height="12" rx="3"/>
+    <rect x="82" y="98" width="16" height="12" rx="3"/>
+    <rect x="104" y="98" width="16" height="12" rx="3"/>
+    <rect x="126" y="98" width="16" height="12" rx="3"/>
+    <rect x="82" y="118" width="16" height="12" rx="3"/>
+    <rect x="104" y="118" width="16" height="12" rx="3"/>
+    <rect x="126" y="118" width="16" height="12" rx="3"/>
+    <rect x="60" y="138" width="16" height="12" rx="3"/>
+  </g>
+  <rect x="60" y="118" width="16" height="12" rx="3" fill="#B4441E"/>
+  <!-- arrow through the pipeline -->
+  <g stroke="#B4441E" stroke-width="2.2" fill="none">
+    <path d="M168 116 h44"/>
+  </g>
+  <path d="M210 109 L 224 116 L 210 123 Z" fill="#B4441E"/>
+  <!-- journal-entry ledger -->
+  <g fill="#FFFFFF" stroke="#8A7B63" stroke-width="1.5">
+    <rect x="240" y="62" width="118" height="110" rx="10"/>
+  </g>
+  <g stroke="#D8CDBA" stroke-width="1.5">
+    <line x1="252" y1="88" x2="346" y2="88"/>
+    <line x1="252" y1="108" x2="346" y2="108"/>
+    <line x1="252" y1="128" x2="346" y2="128"/>
+    <line x1="252" y1="148" x2="346" y2="148"/>
+  </g>
+  <line x1="316" y1="70" x2="316" y2="164" stroke="#8A7B63" stroke-width="1.4"/>
+  <!-- debit/credit marks -->
+  <g fill="#8A7B63" font-family="ui-monospace, monospace" font-size="11">
+    <text x="258" y="82">JE-001</text>
+    <text x="322" y="102">DR</text>
+    <text x="322" y="122">CR</text>
+  </g>
+  <circle cx="298" cy="118" r="3" fill="#B4441E"/>
+  <!-- encrypted outbound: lock badge -->
+  <g stroke="#B4441E" stroke-width="2" fill="#F6F1E9">
+    <rect x="180" y="176" width="40" height="30" rx="7"/>
+  </g>
+  <path d="M190 176 v-8 a10 10 0 0 1 20 0 v8" fill="none" stroke="#B4441E" stroke-width="2"/>
+  <circle cx="200" cy="190" r="4" fill="#B4441E"/>
+</svg>
