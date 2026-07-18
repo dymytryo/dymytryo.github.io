@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Snowflake to Starburst + Iceberg migration | Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: integrating Divvy's Snowflake workloads into BILL's Starburst/Trino and Apache Iceberg lakehouse under Sarbanes-Oxley controls, with per-object parity, governed cutover, approximately $165K in annualized savings, and a roughly 80% checkpoint across roughly 950 objects." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+  <style>
+    details.code { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); margin: 16px 0; overflow: hidden; }
+    details.code summary { font-family: var(--font-mono); font-size: 0.82rem; color: var(--secondary); padding: 12px 18px; cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; }
+    details.code summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+    details.code[open] summary::before { transform: rotate(90deg); }
+    details.code summary:hover { color: var(--ink); }
+    details.code pre { margin: 0; padding: 4px 18px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6; color: var(--ink); }
+    table.results { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.9rem; }
+    table.results th { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
+    table.results td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    table.results td:first-child { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; color: var(--accent-ink); }
+    .migration-flow { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr); align-items: stretch; gap: 14px; margin: 24px 0; }
+    .migration-flow .stage { display: block; min-width: 0; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); padding: 18px 20px; }
+    .migration-flow .stage strong { display: block; margin-bottom: 5px; }
+    .migration-flow .stage span { color: var(--secondary); font-size: 0.88rem; line-height: 1.5; }
+    .migration-flow .arrow { color: var(--accent); font-family: var(--font-mono); align-self: center; font-size: 1.3rem; }
+    .source-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; }
+    @media (max-width: 680px) {
+      .migration-flow { grid-template-columns: 1fr; }
+      .migration-flow .arrow { justify-self: center; transform: rotate(90deg); }
+      table.results { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study &middot; Acquisition integration</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Snowflake to Starburst + Iceberg migration</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:700px">When BILL acquired Divvy, the data-platform integration had to consolidate analytics workloads without interrupting financial reporting. We moved workloads from Snowflake into BILL&rsquo;s Starburst/Trino and Apache Iceberg lakehouse, with evidence for Sarbanes-Oxley (SOX) controls built into every migration batch. The old and new paths ran in parallel until per-object checks passed, consumers were repointed, and accountable owners approved cutover.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">~$450<small>/day</small></div><div class="label">legacy run rate, about $165K/year</div></div>
+        <div class="metric"><div class="num">~900</div><div class="label">Snowflake credits per week consolidated</div></div>
+        <div class="metric"><div class="num">~3&times;</div><div class="label">temporary Iceberg storage footprint corrected</div></div>
+        <div class="metric"><div class="num">~80%</div><div class="label">of roughly 950 objects moved at checkpoint</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Acquisition integration</span><span>SOX controls</span><span>Snowflake</span><span>Starburst / Trino</span><span>Apache Iceberg</span><span>dbt</span><span>Tableau</span>
+      </div>
+    </div>
+
+    <section aria-labelledby="migration" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Method</p><h2 id="migration">The migration, step by step</h2></div></div>
+
+      <div class="prose">
+        <h3>Step 1: define the control boundary</h3>
+        <p>This was an acquisition integration, not a simple platform swap. The first deliverable was an object inventory with one accountable role, one target pattern, and one acceptance state per workload. The inventory kept migration progress, consumer readiness, and control evidence in the same view.</p>
+      </div>
+
+      <details class="code">
+        <summary>A generic migration record</summary>
+        <pre>object_ref: reporting_object
+source_platform: snowflake
+target_platform: iceberg
+migration_pattern: rebuild_in_dbt
+accountable_role: data_product_owner
+required_checks:
+  - availability
+  - schema_shape
+  - row_count
+  - data_composition
+cutover_gates:
+  - checks_passed
+  - consumers_repointed
+  - owner_approved</pre>
+      </details>
+
+      <div class="prose">
+        <h3>Step 2: run both paths during transition</h3>
+        <p>Snowflake remained the comparison point while Starburst/Trino read the new Apache Iceberg data. This parallel period separated data movement from consumer cutover: engineers could prove parity first, then move dashboards and scheduled workloads in controlled batches.</p>
+      </div>
+
+      <div class="migration-flow" aria-label="Migration flow from Snowflake through parity checks to the Starburst and Iceberg lakehouse">
+        <div class="stage"><strong>Legacy path</strong><span>Snowflake workloads remain available as the comparison point.</span></div>
+        <div class="arrow" aria-hidden="true">&rarr;</div>
+        <div class="stage"><strong>Controlled transition</strong><span>Inventory, automated parity, consumer acceptance, and approval gates.</span></div>
+        <div class="arrow" aria-hidden="true">&rarr;</div>
+        <div class="stage"><strong>Target path</strong><span>Starburst/Trino over governed Apache Iceberg tables.</span></div>
+      </div>
+
+      <div class="prose">
+        <h3>Step 3: choose a migration pattern per object</h3>
+        <p>Stable data could be copied once and checked. Maintained transformation logic moved into dbt. Historical snapshots preserved their effective-date behavior. Unused or invalid objects went through a documented removal path instead of being copied automatically. Treating the inventory as a decision queue prevented legacy clutter from becoming lakehouse clutter.</p>
+      </div>
+
+      <details class="code">
+        <summary>Decision logic used by the migration queue</summary>
+        <pre>if object_is_unused_or_invalid:
+    route = "review_then_remove"
+elif object_contains_maintained_logic:
+    route = "rebuild_in_dbt"
+elif object_preserves_history:
+    route = "copy_with_history_checks"
+else:
+    route = "copy_then_validate"
+
+publish(route, owner_role, required_checks)</pre>
+      </details>
+
+      <div class="prose">
+        <h3>Step 4: make parity the acceptance evidence</h3>
+        <p>Availability alone was not enough. The check compared object presence, schema shape, row counts, and composition signals such as date ranges, numeric totals, key uniqueness, boolean distributions, and null rates. Results were attached to the migration record, which made the same evidence useful for engineering review and SOX control support.</p>
+      </div>
+
+      <details class="code">
+        <summary>Per-object parity contract</summary>
+        <pre>checks = [
+    compare_availability(legacy_object, lakehouse_object),
+    compare_schema_shape(legacy_object, lakehouse_object),
+    compare_row_count(legacy_object, lakehouse_object),
+    compare_data_composition(legacy_object, lakehouse_object),
+]
+
+result = "pass" if all(check.passed for check in checks) else "review"
+publish_evidence(object_ref, result, checks)</pre>
+      </details>
+
+      <div class="prose">
+        <h3>Step 5: repoint consumers without a single cutover event</h3>
+        <p>Tableau data sources and scheduled consumers moved by owner and workload group. A compatibility path kept reads available while connections changed. Each group had a short acceptance loop: repoint, compare, confirm, and monitor. This reduced cutover risk and gave users clear ownership for questions and incidents.</p>
+
+        <h3>Step 6: operate Iceberg as a storage system</h3>
+        <p>The migration initially created an Apache Iceberg footprint about three times larger than expected. The response combined small-file compaction, snapshot expiry, orphan-file cleanup, and manifest maintenance, all protected by a row-count guard. The durable lesson was operational: moving data to object storage does not remove storage management; it changes which maintenance controls matter.</p>
+      </div>
+
+      <details class="code">
+        <summary>Maintenance order with a safety gate</summary>
+        <pre>before = capture_row_count(table_ref)
+
+compact_small_files(table_ref)
+expire_snapshots(table_ref, retention_policy)
+remove_orphan_files(table_ref, retention_policy)
+rewrite_manifests(table_ref)
+
+after = capture_row_count(table_ref)
+assert after == before</pre>
+      </details>
+    </section>
+
+    <section aria-labelledby="results" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Results</p><h2 id="results">What the integration delivered</h2></div></div>
+
+      <div class="prose">
+        <p>The measured checkpoint showed that the architecture and operating model were working together: progress was visible, acceptance was evidence-based, and the financial benefit could be tied to retirement of the separate platform.</p>
+      </div>
+
+      <table class="results">
+        <thead><tr><th>Measure</th><th>Rounded result</th><th>Business meaning</th></tr></thead>
+        <tbody>
+          <tr><td>run rate</td><td>About $450 per day, or $165K per year</td><td>Approximate legacy Snowflake spend identified for removal through platform consolidation.</td></tr>
+          <tr><td>compute</td><td>About 900 credits per week</td><td>A separate compute footprint could be retired instead of operated beside the BILL lakehouse.</td></tr>
+          <tr><td>migration</td><td>About 80% of roughly 950 objects</td><td>The checkpoint represented a governed object inventory, not an informal count of copied tables.</td></tr>
+          <tr><td>storage</td><td>About 3&times; temporary footprint</td><td>Iceberg maintenance reversed migration-era bloat and established repeatable retention controls.</td></tr>
+          <tr><td>controls</td><td>Evidence per object</td><td>Parity results, consumer acceptance, and owner approval supported reviewable SOX cutover decisions.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout" style="max-width:760px">
+        <p style="margin:0"><strong>Source &amp; data.</strong> The companion repository contains the case-study overview, generic parity automation, object-availability reporting, Iceberg maintenance controls, and the controlled copy/removal runbook:</p>
+        <div class="source-links">
+          <a class="ulink" href="https://github.com/dymytryo/data_warehouse/tree/main/snowflake">Snowflake migration package</a>
+          <a class="ulink" href="https://github.com/dymytryo/data_warehouse/blob/main/snowflake/README.md">README</a>
+          <a class="ulink" href="https://github.com/dymytryo/data_warehouse/blob/main/snowflake/migration_parity.py">Parity automation</a>
+          <a class="ulink" href="https://github.com/dymytryo/data_warehouse/blob/main/snowflake/object_availability_report.sql">Availability query</a>
+          <a class="ulink" href="https://github.com/dymytryo/data_warehouse/blob/main/snowflake/object_availability_report.yml">Availability contract</a>
+          <a class="ulink" href="https://github.com/dymytryo/data_warehouse/blob/main/snowflake/iceberg_maintenance.md">Iceberg maintenance</a>
+          <a class="ulink" href="https://github.com/dymytryo/data_warehouse/blob/main/snowflake/object_copy_removal_runbook.md">Copy/removal runbook</a>
+        </div>
+      </div>
+    </section>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+</body>
+</html>

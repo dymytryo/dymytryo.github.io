@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" role="img" aria-labelledby="title desc">
+  <title id="title">Snowflake to Iceberg migration</title>
+  <desc id="desc">A Snowflake symbol moves through a validation gate into layered lakehouse storage.</desc>
+  <rect width="400" height="250" fill="#F6F1E9"/>
+
+  <rect x="30" y="69" width="106" height="112" rx="14" fill="#F6F1E9" stroke="#D8CDBA" stroke-width="2"/>
+  <g stroke="#8A7B63" stroke-width="3" stroke-linecap="round">
+    <path d="M83 92v66M54 108l58 34M112 108l-58 34"/>
+    <path d="M83 102l-8-8M83 102l8-8M83 148l-8 8M83 148l8 8"/>
+    <path d="M63 113l-11-2M63 113l-4-10M103 137l11 2M103 137l4 10"/>
+    <path d="M103 113l11-2M103 113l4-10M63 137l-11 2M63 137l-4 10"/>
+  </g>
+
+  <path d="M149 125h43" fill="none" stroke="#B4441E" stroke-width="4" stroke-linecap="round"/>
+  <path d="M181 114l13 11-13 11" fill="none" stroke="#B4441E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="205" y="82" width="42" height="86" rx="10" fill="#F6F1E9" stroke="#D8CDBA" stroke-width="2"/>
+  <circle cx="226" cy="104" r="7" fill="#B4441E"/>
+  <circle cx="226" cy="125" r="7" fill="#8A7B63"/>
+  <circle cx="226" cy="146" r="7" fill="#D8CDBA"/>
+
+  <path d="M260 125h28" fill="none" stroke="#B4441E" stroke-width="4" stroke-linecap="round"/>
+  <path d="M278 114l13 11-13 11" fill="none" stroke="#B4441E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g stroke-width="2">
+    <rect x="302" y="72" width="70" height="25" rx="7" fill="#B4441E" stroke="#B4441E"/>
+    <rect x="294" y="105" width="78" height="25" rx="7" fill="#F6F1E9" stroke="#8A7B63"/>
+    <rect x="285" y="138" width="87" height="25" rx="7" fill="#F6F1E9" stroke="#D8CDBA"/>
+    <rect x="278" y="171" width="94" height="25" rx="7" fill="#8A7B63" stroke="#8A7B63"/>
+  </g>
+
+  <path d="M211 55c6-11 24-11 30 0" fill="none" stroke="#B4441E" stroke-width="2" stroke-linecap="round"/>
+  <path d="M216 56l-5-1 1-5M236 56l5-1-1-5" fill="none" stroke="#B4441E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
