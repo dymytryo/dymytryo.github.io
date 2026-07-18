@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#F6F1E9"/>
+  <!-- layered pyramid -->
+  <g stroke-linejoin="round">
+    <polygon points="200,38 238,86 162,86" fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5"/>
+    <polygon points="156,94 244,94 262,128 138,128" fill="#FDF8F0" stroke="#8A7B63" stroke-width="1.5"/>
+    <polygon points="132,136 268,136 288,172 112,172" fill="#B4441E" stroke="#B4441E" stroke-width="1.5"/>
+    <polygon points="106,180 294,180 312,212 88,212" fill="#FFFFFF" stroke="#D8CDBA" stroke-width="1.5"/>
+  </g>
+  <!-- layer labels -->
+  <g font-family="ui-monospace, monospace" font-size="11" fill="#8A7B63">
+    <text x="330" y="70">marts</text>
+    <text x="330" y="115">int</text>
+    <text x="330" y="158" fill="#B4441E" font-weight="bold">primary</text>
+    <text x="330" y="200">staging</text>
+  </g>
+  <g stroke="#D8CDBA" stroke-width="1.2" stroke-dasharray="3 3">
+    <line x1="240" y1="66" x2="326" y2="66"/>
+    <line x1="252" y1="111" x2="326" y2="111"/>
+    <line x1="278" y1="154" x2="326" y2="154"/>
+    <line x1="298" y1="196" x2="326" y2="196"/>
+  </g>
+  <!-- adoption ticks rising on the left -->
+  <g fill="#8A7B63">
+    <rect x="46" y="176" width="10" height="20" rx="2" opacity="0.45"/>
+    <rect x="62" y="166" width="10" height="30" rx="2" opacity="0.7"/>
+    <rect x="78" y="152" width="10" height="44" rx="2"/>
+  </g>
+  <path d="M46 168 L83 140" stroke="#B4441E" stroke-width="1.8" fill="none"/>
+  <path d="M78 136 L 88 138 L 82 146 Z" fill="#B4441E"/>
+</svg>
