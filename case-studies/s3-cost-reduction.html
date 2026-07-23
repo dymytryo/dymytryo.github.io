@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>S3 cost reduction for an Iceberg lakehouse — Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: a 1.5 PB Iceberg lakehouse bucket growing 14x in six months, a 3.3x storage multiplication diagnosis, five workstreams, and the December cliff: -70% in the first full month after nightly maintenance and orphan cleanup shipped." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">S3 cost reduction for an Iceberg lakehouse</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">Two warehouse migrations landed on one S3 bucket, and nobody owned the bucket itself. Eighteen months later: 1.5 PB, 210 million objects averaging 7.6 MB, and an S3 bill that went 14x in six months. The diagnosis was a 3.3x storage multiplication from zero Iceberg maintenance; the fix was a five-workstream program with falsifiable targets. Nightly maintenance and orphan cleanup shipped in late November; December's bill answered with a 70% drop.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">1.5 PB</div><div class="label">bucket footprint at kickoff, 210M objects</div></div>
+        <div class="metric"><div class="num">3.3&times;</div><div class="label">Iceberg footprint vs actual data in the core prefix</div></div>
+        <div class="metric"><div class="num">&minus;70%</div><div class="label">monthly S3 cost, first full month after rollout</div></div>
+        <div class="metric"><div class="num">&lt;$5K</div><div class="label">January run-rate, down from a $34.5K peak</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Amazon S3</span><span>Apache Iceberg</span><span>Starburst / Trino</span><span>Airflow</span><span>FinOps</span>
+      </div>
+      <div class="slide-link" style="margin-top:22px">
+        <div>
+          <p class="eyebrow">Companion repos</p>
+          <p>The maintenance machinery behind the program is public: the scheduled Iceberg optimization and orphan-object detection repo, and the post-hook maintenance macro that keeps every build compacted, expired, and orphan-free.</p>
+        </div>
+        <div class="slide-link-actions">
+          <a href="https://github.com/dymytryo/dbt-lifecycle-management">dbt-lifecycle-management</a>
+          <a href="https://github.com/dymytryo/data_warehouse/blob/main/snowflake/iceberg_maintenance.md">Iceberg maintenance macro</a>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:44px">
+      <p class="eyebrow" style="margin:0">The deck &middot; 12 slides</p>
+    </div>
+    <div class="slides">
+      <img src="../assets/img/cost-optimization/slide-01.png" loading="lazy" width="1920" height="1080" alt="Title: storage is a system, not a bucket. 1.5 PB footprint, 3.3x multiplication, $27.9K October cost, -70% first month after rollout" />
+      <img src="../assets/img/cost-optimization/slide-02.png" loading="lazy" width="1920" height="1080" alt="Context: one production bucket, 1.5 PB, 210.2M objects, 7.6 MB average object against a 512 MB healthy target, 111.4M monthly requests" />
+      <img src="../assets/img/cost-optimization/slide-03.png" loading="lazy" width="1920" height="1080" alt="Problem: monthly S3 cost from $2K in May to $27.9K in October, trajectory $40K+ by January without intervention" />
+      <img src="../assets/img/cost-optimization/slide-04.png" loading="lazy" width="1920" height="1080" alt="Diagnosis: zero Iceberg maintenance, snapshots never expired, small-file proliferation, orphan directories from table recreations" />
+      <img src="../assets/img/cost-optimization/slide-05.png" loading="lazy" width="1920" height="1080" alt="The smoking gun: 438 TB Iceberg footprint versus 131 TB of actual data in one core prefix, 307 TB of pure overhead" />
+      <img src="../assets/img/cost-optimization/slide-06.png" loading="lazy" width="1920" height="1080" alt="The orphan directory pattern: recreated tables leave previous UUID-suffixed locations billed but invisible to Iceberg metadata; maintenance validated to clean only current locations" />
+      <div class="slide-link">
+        <div>
+          <p class="eyebrow">Repo companion</p>
+          <p>Orphan directories are invisible to catalog queries, so detection runs against the dbt manifest and S3 inventory instead: the orphan-object detection pattern is public in the lifecycle repo.</p>
+        </div>
+        <div class="slide-link-actions">
+          <a href="https://github.com/dymytryo/dbt-lifecycle-management">Orphan detection</a>
+          <a href="https://github.com/dymytryo/data_warehouse/blob/main/snowflake/iceberg_maintenance.md">Maintenance macro</a>
+        </div>
+      </div>
+      <img src="../assets/img/cost-optimization/slide-07.png" loading="lazy" width="1920" height="1080" alt="Five workstreams: Iceberg maintenance, storage lifecycle, table optimization, platform consolidation, cost segmentation by team" />
+      <img src="../assets/img/cost-optimization/slide-08.png" loading="lazy" width="1920" height="1080" alt="Funded targets: 1.5 PB to 450-500 TB, $27.9K to $10-12K monthly, 7.6 MB files to 512 MB target, unbounded snapshots to 7-day retention" />
+      <img src="../assets/img/cost-optimization/slide-09.png" loading="lazy" width="1920" height="1080" alt="Demand-side workstreams: prevent 50% of unnecessary growth, consolidate Snowflake and Redshift, segment costs by S3 prefix ownership" />
+      <img src="../assets/img/cost-optimization/slide-10.png" loading="lazy" width="1920" height="1080" alt="Governance: tiger team with dedicated owners, weekly standups, monthly executive reviews, stakeholder validation before any deletion to protect time travel" />
+      <img src="../assets/img/cost-optimization/slide-11.png" loading="lazy" width="1920" height="1080" alt="Results: project-tagged S3 actuals peak at $34.5K in November, drop to $10.39K in December and $4.8K in a partial January" />
+      <div class="slide-link">
+        <div>
+          <p class="eyebrow">Related case study</p>
+          <p>Workstream four is its own story: the Snowflake estate consolidation that removes a ~$443/day compute bill alongside the storage cleanup.</p>
+        </div>
+        <div class="slide-link-actions">
+          <a href="snowflake-starburst-migration.html">Snowflake integration case study</a>
+        </div>
+      </div>
+      <img src="../assets/img/cost-optimization/slide-12.png" loading="lazy" width="1920" height="1080" alt="Outcome: without the program $40K+ monthly and compounding; with it, a $10.4K December and sub-$5K January, maintenance running nightly. Lessons on maintenance as architecture" />
+    </div>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>window.lucide && lucide.createIcons();</script>
+</body>
+</html>
