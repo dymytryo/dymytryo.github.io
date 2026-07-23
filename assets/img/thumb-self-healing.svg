@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#F6F1E9"/>
+  <!-- closed loop -->
+  <g fill="none" stroke="#8A7B63" stroke-width="2">
+    <path d="M200 52 A 78 78 0 1 1 128 92"/>
+  </g>
+  <path d="M136 82 L 124 96 L 142 100 Z" fill="#8A7B63"/>
+  <!-- loop nodes: observe / decide / heal -->
+  <g stroke-width="1.5">
+    <circle cx="200" cy="52" r="21" fill="#FFFFFF" stroke="#D8CDBA"/>
+    <circle cx="272" cy="160" r="21" fill="#FFFFFF" stroke="#D8CDBA"/>
+    <circle cx="128" cy="160" r="21" fill="#F3D9CC" stroke="#B4441E"/>
+  </g>
+  <!-- observe: eye -->
+  <g stroke="#8A7B63" stroke-width="1.6" fill="none">
+    <path d="M188 52 q12 -9 24 0 q-12 9 -24 0"/>
+  </g>
+  <circle cx="200" cy="52" r="3.2" fill="#8A7B63"/>
+  <!-- decide: branching -->
+  <g stroke="#8A7B63" stroke-width="1.6" fill="none">
+    <path d="M272 150 v8 M272 158 l-8 9 M272 158 l8 9"/>
+  </g>
+  <!-- heal: wrench spark -->
+  <g stroke="#B4441E" stroke-width="1.8" fill="none">
+    <path d="M120 168 L 136 152 M132 148 a6 6 0 1 0 8 8"/>
+  </g>
+  <!-- pulse line under the loop: flatline recovering -->
+  <g fill="none" stroke="#B4441E" stroke-width="2">
+    <path d="M56 218 h60 l10 -14 l10 24 l10 -18 l8 8 h60 l10 -14 l10 24 l10 -18 l8 8 h60"/>
+  </g>
+  <!-- state dots -->
+  <g>
+    <circle cx="330" cy="52" r="6" fill="#8A7B63"/>
+    <circle cx="348" cy="52" r="6" fill="#D8CDBA"/>
+    <circle cx="366" cy="52" r="6" fill="#B4441E"/>
+  </g>
+</svg>
