@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Primary layer: one model per entity in dbt — Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: a governed single-source-of-truth layer in dbt. Three vendor dimensions consolidated into one, a multi-hour build cut to under 20 minutes, conformed entities moved ahead of the production run, and adoption measured daily until the migration stuck: 10% to 15% in a checkpoint week." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Primary layer: one model per entity</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">Teams kept rebuilding the same business entities from the same sources, with slightly different answers, and every rebuild made the daily production run longer. The fix was structural: a governed primary layer between staging and everything else, one centrally owned model per entity, with the adoption of that layer measured daily until the migration actually happened. Architecture by mechanism, not memo.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">&lt;20 min</div><div class="label">consolidated entity build, from a multi-hour miss</div></div>
+        <div class="metric"><div class="num">3 &rarr; 1</div><div class="label">overlapping vendor dimensions consolidated</div></div>
+        <div class="metric"><div class="num">10&rarr;15%</div><div class="label">adoption across ~1,000 models in a checkpoint week</div></div>
+        <div class="metric"><div class="num">30%</div><div class="label">marts adoption vs ~5% intermediate: the migration queue</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>dbt</span><span>architecture</span><span>Airflow</span><span>governance</span><span>Tableau</span>
+      </div>
+      <div class="slide-link" style="margin-top:22px">
+        <div>
+          <p class="eyebrow">Companion writeup</p>
+          <p>The pattern, the adoption-tracker DAG that walks the dbt manifest, the snapshot contract, and the sanitized dashboard live in the dbt patterns repo; sections below deep-link beside the slides they support.</p>
+        </div>
+        <div class="slide-link-actions">
+          <a href="https://github.com/dymytryo/dbt/tree/main/patterns/primary_layer">patterns/primary_layer</a>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:44px">
+      <p class="eyebrow" style="margin:0">The deck &middot; 10 slides</p>
+    </div>
+    <div class="slides">
+      <img src="../assets/img/primary-layer/slide-01.png" loading="lazy" width="1920" height="1080" alt="Title: one model per entity. Under 20 minutes from a multi-hour miss, ~1,000 models tracked, 10 to 15 percent adoption in a week, 30 percent marts adoption" />
+      <img src="../assets/img/primary-layer/slide-02.png" loading="lazy" width="1920" height="1080" alt="Problem: duplicated logic, distrust breeding model sprawl, circular dependencies, slower daily builds" />
+      <img src="../assets/img/primary-layer/slide-03.png" loading="lazy" width="1920" height="1080" alt="Design: the layer pyramid, marts over intermediate over the governed primary layer over staging" />
+      <img src="../assets/img/primary-layer/slide-04.png" loading="lazy" width="1920" height="1080" alt="Conventions: real booleans, snake_case naming, logic validated across teams, central ownership" />
+      <img src="../assets/img/primary-layer/slide-05.png" loading="lazy" width="1920" height="1080" alt="Consolidation: three overlapping vendor dimensions becoming one primary_vendor, a multi-hour build miss now completing in under 20 minutes" />
+      <img src="../assets/img/primary-layer/slide-06.png" loading="lazy" width="1920" height="1080" alt="Cycle times: before and after Gantt, the primary layer building right after staging so production starts and ends earlier" />
+      <img src="../assets/img/primary-layer/slide-07.png" loading="lazy" width="1920" height="1080" alt="Measurement: six steps from reading the dbt manifest to a daily adoption snapshot and domain league table" />
+      <div class="slide-link">
+        <div>
+          <p class="eyebrow">Repo companion</p>
+          <p>The tracker as it runs: manifest lineage walk on dbt unique IDs, the daily snapshot contract, and the configuration table that keeps deployment values out of source.</p>
+        </div>
+        <div class="slide-link-actions">
+          <a href="https://github.com/dymytryo/dbt/blob/main/patterns/primary_layer/model_usage_export.py">model_usage_export.py</a>
+          <a href="https://github.com/dymytryo/dbt/blob/main/patterns/primary_layer/README.md">Pattern writeup</a>
+        </div>
+      </div>
+      <img src="../assets/img/primary-layer/slide-08.png" loading="lazy" width="1920" height="1080" alt="Results: adoption climbing 10 to 15 percent across a checkpoint week, marts at about 30 percent versus about 5 percent for intermediate models" />
+      <img src="../assets/img/primary-layer/slide-09.png" loading="lazy" width="1920" height="1080" alt="Sustaining adoption: CI checks, automated linting, documentation over word of mouth, a visible per-domain league table" />
+      <img src="../assets/img/primary-layer/slide-10.png" loading="lazy" width="1920" height="1080" alt="Outcome: a shared layer reduces duplication only when ownership, build ordering, adoption evidence, and enforcement are designed together" />
+    </div>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>window.lucide && lucide.createIcons();</script>
+</body>
+</html>
