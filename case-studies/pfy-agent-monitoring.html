@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PFY agent performance management — Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: an end-to-end data and BI platform for virtual card payment agents. Six systems (QuickBase, Five9, payment tables, Marqeta, Adyen, Workday) integrated via webhooks, Glue, Snowflake, and dbt into a governed performance dashboard with attempt-to-call verification, no-call anomaly detection, and labor-adjusted productivity metrics." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">PFY agent performance management</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:660px">Pay-for-you agents contact vendors and process virtual card payments on customers&rsquo; behalf, and judging their performance meant a supervisor stitching six systems together by hand every review cycle. I built the platform that did it once, governed: QuickBase, Five9, proprietary payment tables, Marqeta and Adyen reconciliation, and Workday integrated through webhooks, AWS Glue, Snowflake, and dbt, into a Tableau dashboard whose signature move was checking whether a recorded PFY attempt actually had a call behind it.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">6 &rarr; 1</div><div class="label">source systems into one governed source of truth</div></div>
+        <div class="metric"><div class="num">9</div><div class="label">scorecard metrics; the outlier names its own driver</div></div>
+        <div class="metric"><div class="num">9% &rarr; 3%</div><div class="label">no-call PFY rate after attempt-to-call validation</div></div>
+        <div class="metric"><div class="num">3 wk &rarr; 2 d</div><div class="label">to flag persistent underperformance for coaching</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Snowflake</span><span>dbt</span><span>AWS Glue</span><span>Five9</span><span>Tableau</span><span>reconciliation</span>
+      </div>
+      <div class="prose" style="margin-top:22px">
+        <p style="color:var(--secondary);font-size:0.95rem;max-width:720px">Impact figures are representative and modeled from the delivered metric framework at roughly 40 agents and 6 supervisors, not audited production numbers. The architecture, source systems, and business logic are as built.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:44px">
+      <p class="eyebrow" style="margin:0">The deck &middot; 11 slides</p>
+    </div>
+    <div class="slides">
+      <img src="../assets/img/pfy-monitoring/slide-01.png" loading="lazy" width="1920" height="1080" alt="Title: did the agent make the call? 40 agents, 6 systems, 9 scorecard metrics, one governed source of truth" />
+      <img src="../assets/img/pfy-monitoring/slide-02.png" loading="lazy" width="1920" height="1080" alt="Problem: one operation across six systems (QuickBase, Five9, payment tables, Marqeta + Adyen, Workday) with no join between attempts and calls" />
+      <img src="../assets/img/pfy-monitoring/slide-03.png" loading="lazy" width="1920" height="1080" alt="The gap: volume answered none of the real questions, did the agent call, did it settle, productivity per hour, was it persistent" />
+      <img src="../assets/img/pfy-monitoring/architecture.png" loading="lazy" width="1672" height="941" alt="Architecture: six sources through webhooks and AWS Glue into Snowflake plus dbt, business logic and reconciliation, out to Tableau for supervisors and operations managers" />
+      <div class="slide-link">
+        <div>
+          <p class="eyebrow">The architecture</p>
+          <p>Event-driven webhooks and scheduled partner-file processing land through AWS Glue into Snowflake; dbt owns transformations, tests, documentation, and the metric layer; Tableau delivers scoped views to supervisors and operations managers.</p>
+        </div>
+        <div class="slide-link-actions">
+          <a href="snowflake-starburst-migration.html">Related: Snowflake platform work</a>
+        </div>
+      </div>
+      <img src="../assets/img/pfy-monitoring/slide-05.png" loading="lazy" width="1920" height="1080" alt="Core logic: each PFY attempt matched to Five9 call activity on agent, window, destination, and duration, producing a verified-call rate whose inverse is no-call PFY" />
+      <img src="../assets/img/pfy-monitoring/slide-06.png" loading="lazy" width="1920" height="1080" alt="Reconciliation: attempted, settled, and voided tokens reconciled against payment records and Marqeta + Adyen files, measuring outcomes not entered activity" />
+      <img src="../assets/img/pfy-monitoring/slide-07.png" loading="lazy" width="1920" height="1080" alt="Workforce: a time-aware Workday hierarchy enabling team attribution, onshore vs offshore segmentation, productivity per hour, and ownership-scoped access" />
+      <img src="../assets/img/pfy-monitoring/slide-08.png" loading="lazy" width="1920" height="1080" alt="Scorecard: nine metrics per agent; instead of one red-yellow-green rating, the dashboard names the metric driving each outlier" />
+      <img src="../assets/img/pfy-monitoring/slide-09.png" loading="lazy" width="1920" height="1080" alt="Impact: ~900 supervisor hours saved per year, +14% tokens per hour, no-call rate 9 to 3 percent, detection from 3 weeks to 2 days, investigation from 25 to 3 minutes" />
+      <img src="../assets/img/pfy-monitoring/slide-10.png" loading="lazy" width="1920" height="1080" alt="Trust: metric definitions in dbt not spreadsheets, tested and lineage-documented, exception-based views, access scoped by organizational ownership" />
+      <img src="../assets/img/pfy-monitoring/slide-11.png" loading="lazy" width="1920" height="1080" alt="Takeaway: the dashboard gave supervisors evidence and context and the one metric that turned a hunch into a plan, not verdicts" />
+    </div>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>window.lucide && lucide.createIcons();</script>
+</body>
+</html>
