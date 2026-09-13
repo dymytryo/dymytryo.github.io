@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Snowflake multi-region data consolidation with dbt | Dmytro Valiaiev</title>
+  <meta name="description" content="Case study: publishing four regional lending datasets into one Snowflake analytics account through local zero-copy shares, cross-region replication groups, and one shared dbt codebase." />
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,550;9..144,600&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/style.css" />
+  <style>
+    .architecture-frame { margin: 24px 0; border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; background: #f6f1e9; }
+    .architecture-frame img { display: block; width: 100%; height: auto; }
+    .architecture-frame figcaption { padding: 12px 16px; border-top: 1px solid var(--rule); color: var(--secondary); font-size: .82rem; line-height: 1.5; }
+    table.results { border-collapse: collapse; width: 100%; margin: 18px 0; font-size: .9rem; }
+    table.results th { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule-2); }
+    table.results td { padding: 11px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    table.results td:first-child { font-family: var(--font-mono); font-size: .78rem; white-space: nowrap; color: var(--accent-ink); }
+    .flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 22px 0; }
+    .flow .stage { position: relative; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); padding: 16px; min-height: 104px; }
+    .flow .stage:not(:last-child)::after { content: "→"; position: absolute; right: -11px; top: 42%; z-index: 2; color: var(--accent); font-family: var(--font-mono); font-size: 1.1rem; }
+    .flow strong { display: block; margin-bottom: 7px; }
+    .flow span { color: var(--secondary); font-size: .84rem; line-height: 1.45; }
+    .incident-flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 20px 0; }
+    .incident-flow span { border: 1px solid var(--rule); border-radius: 999px; background: var(--surface); padding: 9px 13px; font-size: .82rem; }
+    .incident-flow b { color: var(--accent); font-family: var(--font-mono); font-weight: 500; }
+    .source-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; }
+    @media (max-width: 760px) {
+      .flow { grid-template-columns: 1fr; }
+      .flow .stage { min-height: 0; }
+      .flow .stage:not(:last-child)::after { content: "↓"; right: 50%; top: auto; bottom: -15px; }
+      table.results { display: block; overflow-x: auto; }
+      table.results td:first-child { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html"><span class="mono">DV</span> Dmytro Valiaiev</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="../projects.html">Projects</a>
+        <a href="../about.html">About</a>
+        <a class="nav-cta" href="../assets/Dmytro-Valiaiev-Resume.pdf">Résumé</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="hero" style="padding-bottom:8px;margin-bottom:8px">
+      <p class="eyebrow">Case study &middot; Data platform architecture</p>
+      <h1 style="font-size:clamp(2.2rem,5vw,3.4rem)">Snowflake multi-region data consolidation with dbt</h1>
+      <p class="lead" style="font-size:1.05rem;line-height:1.6;max-width:760px">Four regional lending datasets needed one governed analytics interface. US and EU data could remain in place and use local Snowflake Secure Data Sharing. MX and AU required physical replication into the analytics region. One dbt repository publishes the same contract across all four datasets, while daily controls turn a failed validation into an operational incident.</p>
+
+      <div class="metrics">
+        <div class="metric"><div class="num">4</div><div class="label">regional lending datasets</div></div>
+        <div class="metric"><div class="num">~1,200</div><div class="label">published regional table objects</div></div>
+        <div class="metric"><div class="num">&gt;500B</div><div class="label">rows in the largest event tables</div></div>
+        <div class="metric"><div class="num">10<small> min</small></div><div class="label">configured refresh-attempt interval</div></div>
+      </div>
+    </section>
+
+    <div class="prose">
+      <div class="tags" style="margin-top:16px">
+        <span>Snowflake</span><span>dbt</span><span>dbt Cloud</span><span>Secure Data Sharing</span><span>replication groups</span><span>GitHub Actions</span><span>Jira</span>
+      </div>
+    </div>
+
+    <section aria-labelledby="topology" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Architecture</p><h2 id="topology">Move data according to geography</h2></div></div>
+      <div class="prose">
+        <p>The analytics account and the <code>PROD_USW2</code> source account both run in <code>AWS_US_WEST_2</code>. That makes direct zero-copy shares the efficient path for US and EU. MX runs in <code>AWS_MX_CENTRAL_1</code>, and AU runs in <code>AWS_AP_SOUTHEAST_2</code>, so those datasets move through Snowflake replication groups.</p>
+      </div>
+
+      <figure class="architecture-frame">
+        <img src="../assets/img/snowflake-multi-region-consolidation/architecture.png" alt="Detailed architecture showing one dbt repository publishing US, EU, MX, and AU lending data. US and EU use zero-copy shares into the analytics account, while MX and AU use physical replication groups." width="1600" height="1000" />
+        <figcaption>Dashed blue paths are zero-copy shares. Solid terracotta paths are physical cross-region replication. All four read-only landings feed a separate writable global analytics database.</figcaption>
+      </figure>
+
+      <table class="results">
+        <thead><tr><th>Path</th><th>Mechanism</th><th>Cost and freshness model</th></tr></thead>
+        <tbody>
+          <tr><td>US + EU</td><td>Direct Secure Data Sharing exposes provider-owned tables through imported read-only databases.</td><td>No duplicate consumer storage or replication transfer. The analytics account pays query compute.</td></tr>
+          <tr><td>MX + AU</td><td>Replication groups copy the regional databases into read-only secondary databases. Analytics roles can access only the published <code>ANALYTICS_EXPORT</code> schemas.</td><td>The target pays replica storage, replication compute, transfer, and query compute. Freshness follows completed asynchronous refreshes.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section aria-labelledby="contract" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Control plane</p><h2 id="contract">One dbt codebase, four regional runs</h2></div></div>
+      <div class="prose">
+        <p>Each dataset publishes roughly 300 equivalent tables covering loan origination, lifecycle events, sale, servicing, payments, payoff, and foreign exchange (FX). Three dbt Cloud connection environments reach the three source accounts; the USW2 environment runs separate US and EU selections. Region tags, source routing, and account-specific targets replace four forks of the transformation code.</p>
+      </div>
+
+      <div class="flow" aria-label="dbt regional publishing flow">
+        <div class="stage"><strong>Review once</strong><span>One pull request runs linting, compilation, tests, and regional-tag validation.</span></div>
+        <div class="stage"><strong>Execute regionally</strong><span>The same revision runs as four regional selections through three account connections.</span></div>
+        <div class="stage"><strong>Publish consistently</strong><span>dbt writes the curated tables into the <code>ANALYTICS_EXPORT</code> schema in each regional database.</span></div>
+        <div class="stage"><strong>Deliver natively</strong><span>Snowflake shares local data and schedules replication for remote data.</span></div>
+      </div>
+
+      <div class="prose">
+        <p>Remote replication operates at database scope, so the MX and AU paths copy more than the schema exposed to analytics. Least-privilege grants keep consumers inside <code>ANALYTICS_EXPORT</code>, while bounded refresh monitoring makes the additional transfer, storage, and compute visible. dbt can reconcile Snowflake object definitions and grants through controlled administrative operations, but Snowflake remains the replication engine and scheduler.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="scale" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Data design</p><h2 id="scale">Keep lending and currency history comparable</h2></div></div>
+      <div class="prose">
+        <p>Global keys include the region so equal source identifiers cannot collide. Loan facts retain source currency, source amount, and event time. FX enrichment adds the effective rate, rate date, reporting currency, and converted amount, which keeps every financial conversion reproducible.</p>
+        <p>Some event tables exceed 500 billion rows. The daily path therefore uses incremental processing and bounded controls instead of full refreshes and full-table scans. Checks focus on changed partitions, recent counts, key uniqueness, lifecycle totals, FX coverage, and source-to-export financial aggregates.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="freshness" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Operations</p><h2 id="freshness">Treat freshness as observed state</h2></div></div>
+      <div class="prose">
+        <p>MX and AU replication groups are configured with a 10-minute interval. This is an attempt schedule, not a ten-minute maximum-lag guarantee. Refreshes are asynchronous, and a long or failed refresh can move observed freshness beyond the interval. The audit therefore checks the latest completed refresh and its primary snapshot timestamp instead of trusting the schedule alone.</p>
+        <p>The daily audit also validates contract shape, expected objects, regional completeness, recent data composition, FX coverage, and access through every share or replica. Global models run only after those controls pass.</p>
+      </div>
+
+      <div class="incident-flow" aria-label="Audit failure incident path">
+        <span>Daily publication</span><b>→</b><span>Bounded audit</span><b>→</b><span>dbt error</span><b>→</b><span>Jira incident</span><b>→</b><span>On-call response</span><b>→</b><span>Rerun</span>
+      </div>
+
+      <div class="prose">
+        <p>Each incident carries the region, object or replication group, failed control, observed snapshot time, and run link. The error is actionable at orchestration time rather than becoming a passive dashboard warning.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="decisions" style="margin-top:44px">
+      <div class="sec-head"><div><p class="eyebrow">Engineering decisions</p><h2 id="decisions">The operating trade-offs</h2></div></div>
+      <table class="results">
+        <thead><tr><th>Decision</th><th>Benefit</th><th>Constraint</th></tr></thead>
+        <tbody>
+          <tr><td>hybrid transport</td><td>Uses zero-copy access where possible and copies data only when geography requires it.</td><td>Local shares and remote replicas have different freshness and cost behavior.</td></tr>
+          <tr><td>one dbt repository</td><td>Applies one reviewed contract and control set to all regions.</td><td>Connections, selectors, and privileges must remain isolated by environment.</td></tr>
+          <tr><td>database-scoped remote replication</td><td>Preserves the regional database topology and Snowflake-managed refresh path.</td><td>Copies more than the exposed schema, increasing transfer and replica-storage cost.</td></tr>
+          <tr><td>read-only landings</td><td>Protects provider and replica state.</td><td>Downstream dbt models need a separate writable database.</td></tr>
+          <tr><td>bounded audits</td><td>Keeps daily validation practical at hundreds of billions of rows.</td><td>Watermarks, late-arriving events, retry rules, and audit windows must be explicit.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout" style="max-width:800px">
+        <p style="margin:0"><strong>Companion architecture.</strong> The project documents the detailed topology, dbt regional control pattern, replication freshness flow, and incident path.</p>
+        <div class="source-links">
+          <a class="ulink" href="https://github.com/dymytryo/data_warehouse/tree/main/projects/snowflake-multi-region-consolidation">Project README</a>
+          <a class="ulink" href="https://github.com/dymytryo/data_warehouse/blob/main/projects/snowflake-multi-region-consolidation/diagrams/snowflake-multi-region-sharing.png">Architecture diagram</a>
+        </div>
+      </div>
+    </section>
+
+    <a class="backlink" href="../projects.html">&larr; All projects</a>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p class="fine">&copy; 2026 Dmytro Valiaiev</p>
+    </div>
+  </footer>
+</body>
+</html>

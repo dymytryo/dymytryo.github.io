@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250" role="img" aria-labelledby="title desc">
+  <title id="title">Snowflake multi-region data consolidation</title>
+  <desc id="desc">Four regional lending datasets converge on one analytics account through two zero-copy shares and two physical replication paths.</desc>
+  <defs>
+    <marker id="blue-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0L7 3.5L0 7Z" fill="#2D6A8A" />
+    </marker>
+    <marker id="orange-arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0L7 3.5L0 7Z" fill="#B4441E" />
+    </marker>
+  </defs>
+  <rect width="400" height="250" fill="#F6F1E9" />
+  <text x="22" y="29" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11" font-weight="700" letter-spacing="1.1" fill="#8A7B63">SNOWFLAKE · MULTI-REGION</text>
+  <text x="22" y="54" font-family="Georgia, serif" font-size="20" font-weight="600" fill="#1A1712">One global analytics plane</text>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <rect x="22" y="78" width="104" height="45" rx="9" fill="#FFFFFF" stroke="#D8CDBA" />
+    <text x="36" y="97" font-size="12" font-weight="650" fill="#1A1712">US + EU</text>
+    <text x="36" y="114" font-size="9" fill="#655C50">AWS_US_WEST_2</text>
+
+    <rect x="22" y="137" width="104" height="38" rx="9" fill="#FFFFFF" stroke="#D8CDBA" />
+    <text x="36" y="160" font-size="12" font-weight="650" fill="#1A1712">MX</text>
+
+    <rect x="22" y="189" width="104" height="38" rx="9" fill="#FFFFFF" stroke="#D8CDBA" />
+    <text x="36" y="212" font-size="12" font-weight="650" fill="#1A1712">AU</text>
+
+    <rect x="166" y="78" width="98" height="45" rx="9" fill="#EAF3F7" stroke="#92B8CA" />
+    <text x="180" y="97" font-size="11" font-weight="650" fill="#1A1712">Secure shares</text>
+    <text x="180" y="114" font-size="9" fill="#2D6A8A">ZERO-COPY</text>
+
+    <rect x="166" y="137" width="98" height="90" rx="9" fill="#FFF9F3" stroke="#D4A085" />
+    <text x="180" y="158" font-size="11" font-weight="650" fill="#1A1712">Replication</text>
+    <text x="180" y="175" font-size="9" fill="#B4441E">PHYSICAL COPY</text>
+    <text x="180" y="199" font-size="9" fill="#655C50">MX + AU</text>
+    <text x="180" y="216" font-size="9" fill="#655C50">10-min attempt</text>
+
+    <rect x="304" y="105" width="74" height="96" rx="12" fill="#23354D" />
+    <text x="317" y="132" font-size="10" font-weight="650" fill="#FFFFFF">ANALYTICS</text>
+    <text x="317" y="148" font-size="10" font-weight="650" fill="#FFFFFF">PLATFORM</text>
+    <line x1="317" y1="161" x2="365" y2="161" stroke="#7792A4" />
+    <text x="317" y="179" font-size="9" fill="#DDEAF0">4 regional</text>
+    <text x="317" y="192" font-size="9" fill="#DDEAF0">landings</text>
+  </g>
+
+  <path d="M126 100H166" fill="none" stroke="#2D6A8A" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#blue-arrow)" />
+  <path d="M126 156H166" fill="none" stroke="#B4441E" stroke-width="3" marker-end="url(#orange-arrow)" />
+  <path d="M126 208H166" fill="none" stroke="#B4441E" stroke-width="3" marker-end="url(#orange-arrow)" />
+  <path d="M264 100H304" fill="none" stroke="#2D6A8A" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#blue-arrow)" />
+  <path d="M264 181H286V169H304" fill="none" stroke="#B4441E" stroke-width="3" marker-end="url(#orange-arrow)" />
+</svg>
