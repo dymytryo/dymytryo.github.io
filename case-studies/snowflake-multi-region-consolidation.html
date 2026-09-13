@@ -77,8 +77,8 @@
       </div>
 
       <figure class="architecture-frame">
-        <img src="../assets/img/snowflake-multi-region-consolidation/architecture.png" alt="Detailed architecture showing one dbt repository publishing US, EU, MX, and AU lending data. US and EU use zero-copy shares into the analytics account, while MX and AU use physical replication groups." width="1600" height="1000" />
-        <figcaption>Dashed blue paths are zero-copy shares. Solid terracotta paths are physical cross-region replication. All four read-only landings feed a separate writable global analytics database.</figcaption>
+        <img src="../assets/img/snowflake-multi-region-consolidation/architecture.png" alt="Detailed architecture showing one dbt repository publishing US, EU, MX, and AU lending data. US and EU use zero-copy shares into the analytics account, while MX and AU use physical replication groups." width="1620" height="971" />
+        <figcaption>The left side shows one repository running through three dbt Cloud connections. The center separates schema-level secure shares from database-level replication groups. The target account receives four read-only regional landings.</figcaption>
       </figure>
 
       <table class="results">
@@ -105,7 +105,41 @@
 
       <div class="prose">
         <p>Remote replication operates at database scope, so the MX and AU paths copy more than the schema exposed to analytics. Least-privilege grants keep consumers inside <code>ANALYTICS_EXPORT</code>, while bounded refresh monitoring makes the additional transfer, storage, and compute visible. dbt can reconcile Snowflake object definitions and grants through controlled administrative operations, but Snowflake remains the replication engine and scheduler.</p>
+        <p>The companion repository includes the implementation: environment-driven source routing, four selectors, a graph-wide region-tag guard, share-grant and cleanup macros, a bounded audit, and GitHub Actions for regional CI, dbt Cloud polling and retry, PR cleanup, and post-merge deployment.</p>
       </div>
+
+      <details class="code">
+        <summary>regional source routing and selector</summary>
+        <pre>database: "{{ {'us': 'PROD_US', 'eu': 'PROD_EU',
+               'mx': 'PROD_MX', 'au': 'PROD_AU'}
+             [env_var('DBT_GEO') | lower] }}"
+
+selectors:
+  - name: default_mx
+    default: "{{ ((env_var('DBT_GEO') | lower) == 'mx') | as_bool }}"
+    definition:
+      union:
+        - method: tag
+          value: mx
+        - exclude:
+            - method: tag
+              value: audit</pre>
+      </details>
+
+      <details class="code">
+        <summary>one reusable dbt Cloud runner for every regional job</summary>
+        <pre>uses: ./.github/workflows/_reusable-dbt-cloud-run.yml
+with:
+  job_name: Data Platform CI MX
+  job_id: ${{ vars.DBT_JOB_ID_CI_MX }}
+  account_id: ${{ vars.DBT_CLOUD_ACCOUNT_ID }}
+  base_url: ${{ vars.DBT_CLOUD_BASE_URL }}
+  git_sha: ${{ github.event.pull_request.head.sha }}
+  pr_number: ${{ github.event.number }}
+  enable_rerun_detection: true
+secrets:
+  DBT_CLOUD_API_TOKEN: ${{ secrets.DBT_CLOUD_API_TOKEN }}</pre>
+      </details>
     </section>
 
     <section aria-labelledby="scale" style="margin-top:44px">
@@ -146,9 +180,10 @@
       </table>
 
       <div class="callout" style="max-width:800px">
-        <p style="margin:0"><strong>Companion architecture.</strong> The project documents the detailed topology, dbt regional control pattern, replication freshness flow, and incident path.</p>
+        <p style="margin:0"><strong>Source and implementation.</strong> The project contains the detailed architecture plus the dbt macros, selectors, audit, and GitHub Actions that operate the regional publishing flow.</p>
         <div class="source-links">
           <a class="ulink" href="https://github.com/dymytryo/data_warehouse/tree/main/projects/snowflake-multi-region-consolidation">Project README</a>
+          <a class="ulink" href="https://github.com/dymytryo/data_warehouse/tree/main/projects/snowflake-multi-region-consolidation/implementation">Implementation files</a>
           <a class="ulink" href="https://github.com/dymytryo/data_warehouse/blob/main/projects/snowflake-multi-region-consolidation/diagrams/snowflake-multi-region-sharing.png">Architecture diagram</a>
         </div>
       </div>
